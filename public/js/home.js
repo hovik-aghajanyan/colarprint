@@ -24,7 +24,7 @@
   grid.replaceChildren(
     ...products.map((p) => {
       const price = fromPrice(p);
-      return h('a', { class: 'card product-card', href: `/product?id=${encodeURIComponent(p.id)}` },
+      return h('a', { class: 'card product-card', href: `product.html?id=${encodeURIComponent(p.id)}` },
         h('div', { class: 'product-icon' }, p.icon || '🖨️'),
         h('h3', null, p.name),
         h('p', { class: 'muted small' }, p.description),
@@ -50,7 +50,7 @@
     tGrid.replaceChildren(
       ...list.map((t) => {
         const product = productById[t.productIds.find((id) => productById[id])];
-        const href = product ? `/design?product=${encodeURIComponent(product.id)}&template=${encodeURIComponent(t.id)}` : null;
+        const href = product ? `design.html?product=${encodeURIComponent(product.id)}&template=${encodeURIComponent(t.id)}` : null;
         return h('div', { class: 'card template-card' },
           thumb(t),
           h('div', { class: 'template-meta' },

@@ -2,6 +2,9 @@
 (function (root) {
   'use strict';
 
+  // True on the GitHub Pages build, where the in-browser StaticApi replaces the server.
+  const isStatic = !!(root.SITE_CONFIG && root.SITE_CONFIG.mode === 'static');
+
   async function api(path, options) {
     options = options || {};
     const headers = { ...(options.headers || {}) };
@@ -10,16 +13,22 @@
       body = JSON.stringify(body);
       headers['Content-Type'] = 'application/json';
     }
-    const res = await fetch(path, { ...options, headers, body });
+    let status;
     let data = null;
-    try {
-      data = await res.json();
-    } catch (e) {
-      data = null;
+    if (isStatic) {
+      ({ status, data } = await root.StaticApi.request(path, { ...options, headers, body }));
+    } else {
+      const res = await fetch(path, { ...options, headers, body });
+      status = res.status;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = null;
+      }
     }
-    if (!res.ok) {
-      const err = new Error((data && (data.error || (data.errors || []).join('. '))) || `Request failed (${res.status})`);
-      err.status = res.status;
+    if (status < 200 || status >= 300) {
+      const err = new Error((data && (data.error || (data.errors || []).join('. '))) || `Request failed (${status})`);
+      err.status = status;
       err.data = data;
       throw err;
     }
@@ -81,5 +90,5 @@
     setTimeout(() => t.remove(), 3800);
   }
 
-  root.App = { api, h, qs, getSettings, initShell, toast, fmtNum };
+  root.App = { api, h, qs, getSettings, initShell, toast, fmtNum, isStatic };
 })(window);

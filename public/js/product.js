@@ -8,7 +8,7 @@
     product = await api(`/api/products/${encodeURIComponent(qs('id') || '')}`);
   } catch (e) {
     document.getElementById('product-name').textContent = 'Product not found';
-    document.getElementById('product-desc').replaceChildren(h('a', { href: '/' }, 'Back to all products'));
+    document.getElementById('product-desc').replaceChildren(h('a', { href: 'index.html' }, 'Back to all products'));
     return;
   }
 
@@ -55,7 +55,7 @@
           // Preview the template at the customer's size so they see the real result.
           h('div', { class: 'design-thumb' }, Render.renderDesign(t, state.widthMm, state.heightMm)),
           h('div', { class: 'template-meta' }, h('strong', null, t.name), h('span', { class: `badge ${t.fit}` }, fitLabel[t.fit])),
-          h('a', { class: 'btn small', href: `/design?${Options.stateToQuery(product.id, state, { template: t.id })}` }, 'Use this template')
+          h('a', { class: 'btn small', href: `design.html?${Options.stateToQuery(product.id, state, { template: t.id })}` }, 'Use this template')
         )
       )
     );
@@ -65,7 +65,7 @@
     const result = Pricing.calculate(product, Options.toQuoteInput(state), settings);
     Options.renderPrice(priceBox, product, settings, state, result);
     updatePreview();
-    uploadBtn.href = `/design?${Options.stateToQuery(product.id, state, { template: 'blank' })}`;
+    uploadBtn.href = `design.html?${Options.stateToQuery(product.id, state, { template: 'blank' })}`;
     history.replaceState(null, '', `?id=${encodeURIComponent(product.id)}&${Options.stateToQuery(product.id, state).replace(/^product=[^&]*&/, '')}`);
     clearTimeout(suggestTimer);
     if (state.widthMm > 0 && state.heightMm > 0) suggestTimer = setTimeout(() => loadSuggestions().catch(console.error), 250);

@@ -2,6 +2,7 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const Pricing = require('../public/js/pricing');
+const { suggestTemplates } = require('../public/js/suggest');
 const {
   ValidationError,
   normalizeProduct,
@@ -9,7 +10,7 @@ const {
   normalizeSettings,
   normalizeCustomer,
   normalizeElements,
-} = require('./validate');
+} = require('../public/js/validate');
 
 const ORDER_STATUSES = ['new', 'in_production', 'ready', 'shipped', 'completed', 'cancelled'];
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
@@ -285,22 +286,6 @@ function createApp(store, { adminPassword }) {
   });
 
   return app;
-}
-
-function suggestTemplates(templates, { productId, width, height }) {
-  const targetRatio = width > 0 && height > 0 ? width / height : null;
-  return templates
-    .filter((t) => !productId || t.productIds.includes(productId))
-    .map((t) => {
-      const ratio = t.width / t.height;
-      // Log distance treats 2:1 and 1:2 symmetrically; 0 = identical shape.
-      const distance = targetRatio ? Math.abs(Math.log(targetRatio / ratio)) : 0;
-      let fit = 'good';
-      if (distance > 0.35) fit = 'poor';
-      else if (distance > 0.12) fit = 'ok';
-      return { ...t, fit, fitScore: Math.round((1 / (1 + distance)) * 100) };
-    })
-    .sort((a, b) => b.fitScore - a.fitScore || a.name.localeCompare(b.name));
 }
 
 module.exports = { createApp, suggestTemplates, ORDER_STATUSES };

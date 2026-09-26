@@ -245,11 +245,7 @@
   });
   document.getElementById('download').addEventListener('click', async () => {
     try {
-      const url = await Render.svgToPng(currentSvg, 1600);
-      const a = h('a', { href: url, download: `${product.id}-design.png` });
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      await downloadDesign();
     } catch (e) {
       toast('Could not create the preview image.', 'error');
     }
@@ -302,7 +298,7 @@
     }
     const query = Options.stateToQuery(product.id, state, { template: template.id || 'blank' });
     history.replaceState(null, '', `?${query}`);
-    document.getElementById('back-link').href = `/product?id=${encodeURIComponent(product.id)}&${Options.stateToQuery(product.id, state).replace(/^product=[^&]*&/, '')}`;
+    document.getElementById('back-link').href = `product.html?id=${encodeURIComponent(product.id)}&${Options.stateToQuery(product.id, state).replace(/^product=[^&]*&/, '')}`;
   }
 
   Options.createForm(document.getElementById('options'), product, settings, state, onOptionsChange, { compact: true });
@@ -315,6 +311,52 @@
   const close = () => modal.classList.add('hidden');
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  function downloadDesign() {
+    return Render.svgToPng(currentSvg, 2400).then((url) => {
+      const a = h('a', { href: url, download: `${product.id}-design.png` });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  }
+
+  function staticOrderSent(order, b, customer) {
+    const size = `${App.fmtNum(Pricing.fromMm(b.widthMm, state.unit))} × ${App.fmtNum(Pricing.fromMm(b.heightMm, state.unit))} ${state.unit}`;
+    const lines = [
+      `Order number: ${order.id}`,
+      `Product: ${product.name}`,
+      `Template: ${template.name}`,
+      `Size: ${size}`,
+      `Quantity: ${b.quantity}`,
+      b.color && `Colors: ${b.color.name}`,
+      b.material && `Material: ${b.material.name}`,
+      b.side && `Sides: ${b.side.name}`,
+      b.finishes.length && `Finishing: ${b.finishes.map((f) => f.name).join(', ')}`,
+      b.turnaround && `Turnaround: ${b.turnaround.name}`,
+      `Quoted total: ${Pricing.formatMoney(b.total, settings)}`,
+      '',
+      `Name: ${customer.name}`,
+      `Email: ${customer.email}`,
+      customer.phone && `Phone: ${customer.phone}`,
+      `Delivery: ${customer.address || 'Pickup'}`,
+      customer.notes && `Notes: ${customer.notes}`,
+      '',
+      'My design file is attached.',
+    ].filter((l) => l !== false && l !== undefined && l !== null && l !== 0);
+    const mailto = `mailto:${encodeURIComponent(settings.contactEmail)}?subject=${encodeURIComponent(`Print order ${order.id}`)}&body=${encodeURIComponent(lines.join('\n'))}`;
+    return [
+      h('h2', null, 'Almost done: send us your order'),
+      h('p', null, 'Your order number is ', h('strong', null, order.id), '.'),
+      h('ol', null,
+        h('li', null, 'Download your design file.'),
+        h('li', null, `Email the order to ${settings.contactEmail} with the file attached. The email is filled in for you.`)),
+      h('div', { class: 'row' },
+        h('button', { class: 'btn secondary', type: 'button', onclick: () => downloadDesign().catch(() => toast('Could not create the design file.', 'error')) }, '1. Download design'),
+        h('a', { class: 'btn', href: mailto }, '2. Email order')),
+      h('p', { class: 'help', style: 'margin-top:12px' }, `Total quoted: ${Pricing.formatMoney(b.total, settings)}. We will confirm the price and payment by email.`),
+    ];
+  }
 
   document.getElementById('order-btn').addEventListener('click', () => {
     const result = updatePrice();
@@ -354,13 +396,18 @@
             customer: Object.fromEntries(fd.entries()),
           },
         });
+        if (App.isStatic) {
+          // No server on the static site: the customer sends the order by email.
+          content.replaceChildren(...staticOrderSent(order, result.breakdown, Object.fromEntries(fd.entries())));
+          return;
+        }
         content.replaceChildren(
           h('h2', null, '🎉 Order placed!'),
           h('p', null, 'Your order number is ', h('strong', null, order.id), '.'),
           h('p', { class: 'muted' }, `Total: ${Pricing.formatMoney(order.total, settings)}. We will email you when your print is ready.`),
           h('div', { class: 'row' },
-            h('a', { class: 'btn', href: `/track?id=${encodeURIComponent(order.id)}` }, 'Track order'),
-            h('a', { class: 'btn secondary', href: '/' }, 'Back to shop'))
+            h('a', { class: 'btn', href: `track.html?id=${encodeURIComponent(order.id)}` }, 'Track order'),
+            h('a', { class: 'btn secondary', href: 'index.html' }, 'Back to shop'))
         );
       } catch (err) {
         error.textContent = err.message;

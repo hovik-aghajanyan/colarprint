@@ -14,6 +14,6 @@ const store = new Store(DATA_FILE).load();
 const app = createApp(store, { adminPassword: ADMIN_PASSWORD });
 
 app.listen(PORT, () => {
-  console.log(`ColarPrint running at http://localhost:${PORT}`);
+  console.log(`ColorPrint running at http://localhost:${PORT}`);
   console.log(`Admin panel:        http://localhost:${PORT}/admin`);
 });

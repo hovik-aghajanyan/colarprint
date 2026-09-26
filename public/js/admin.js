@@ -2,7 +2,7 @@
   'use strict';
   const { h, toast, fmtNum } = App;
 
-  const TOKEN_KEY = 'colarprint-admin-token';
+  const TOKEN_KEY = 'colorprint-admin-token';
   const STATUS_LABELS = {
     new: 'New', in_production: 'In production', ready: 'Ready', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled',
   };
@@ -20,10 +20,12 @@
   async function adminApi(path, options) {
     options = options || {};
     try {
-      return await App.api(`/api/admin${path}`, {
+      const data = await App.api(`/api/admin${path}`, {
         ...options,
         headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` },
       });
+      if (options.method && options.method !== 'GET') renderStaticBanner();
+      return data;
     } catch (err) {
       if (err.status === 401) showLogin();
       throw err;
@@ -75,6 +77,7 @@
     closeModal();
     const views = { dashboard: renderDashboard, orders: renderOrders, products: renderProducts, templates: renderTemplates, settings: renderSettings };
     view.replaceChildren(h('p', { class: 'muted' }, 'Loading…'));
+    renderStaticBanner();
     (views[name] || renderDashboard)().catch((err) => {
       if (err.status !== 401) view.replaceChildren(h('p', { class: 'error-text' }, err.message));
     });
@@ -335,7 +338,7 @@
           h('td', null, h('span', { class: `badge ${p.active ? 'good' : ''}` }, p.active ? 'Active' : 'Hidden')),
           h('td', { style: 'white-space:nowrap' },
             h('button', { class: 'btn secondary small', onclick: () => editProduct(p) }, 'Edit'), ' ',
-            h('a', { class: 'btn ghost small', href: `/product?id=${encodeURIComponent(p.id)}`, target: '_blank', rel: 'noopener' }, 'View'))
+            h('a', { class: 'btn ghost small', href: `product.html?id=${encodeURIComponent(p.id)}`, target: '_blank', rel: 'noopener' }, 'View'))
         )))
       )))
     );
@@ -667,8 +670,79 @@
           { key: 'name', label: 'Name' },
           { key: 'days', label: 'Working days', type: 'number', step: '1', width: '120px' },
           { key: 'multiplier', label: 'Multiplier', type: 'number', step: '0.05', width: '120px' },
-        ], { newRow: () => ({ id: '', name: '', days: 3, multiplier: 1 }), onChange: () => {}, addLabel: '+ Add turnaround' }))
+        ], { newRow: () => ({ id: '', name: '', days: 3, multiplier: 1 }), onChange: () => {}, addLabel: '+ Add turnaround' })),
+      App.isStatic ? publishCard() : null
     );
+  }
+
+  // ---------- Publishing (static GitHub Pages build only) ----------
+  function download(filename, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = h('a', { href: url, download: filename });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function publishCard() {
+    const fileInput = h('input', {
+      type: 'file', accept: 'application/json,.json', class: 'hidden',
+      onchange: async () => {
+        const file = fileInput.files[0];
+        fileInput.value = '';
+        if (!file) return;
+        try {
+          await StaticApi.importCatalog(JSON.parse(await file.text()));
+          settings = await adminApi('/settings');
+          toast('Catalog imported', 'success');
+          renderStaticBanner();
+          renderSettings();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      },
+    });
+    return h('div', { class: 'card editor-section' },
+      h('h3', null, 'Publish changes to the website'),
+      h('p', null, 'This site runs on GitHub Pages, so your changes to prices, products, templates and settings are saved in this browser only. To publish them for every visitor:'),
+      h('ol', null,
+        h('li', null, 'Click ', h('strong', null, 'Export catalog.json'), '.'),
+        h('li', null, 'In the GitHub repository, replace ', h('code', null, 'public/data/catalog.json'), ' with the downloaded file and commit it.'),
+        h('li', null, 'GitHub Pages redeploys automatically within a minute or two.')),
+      h('div', { class: 'toolbar' },
+        h('button', { class: 'btn', type: 'button', onclick: async () => {
+          download('catalog.json', `${JSON.stringify(await StaticApi.exportCatalog(), null, 2)}\n`, 'application/json');
+        } }, 'Export catalog.json'),
+        h('button', { class: 'btn secondary', type: 'button', onclick: () => fileInput.click() }, 'Import catalog.json'),
+        h('button', { class: 'btn ghost', type: 'button', onclick: async () => {
+          if (!confirm('Discard your unpublished changes and reload the published catalog?')) return;
+          await StaticApi.resetCatalog();
+          settings = await adminApi('/settings');
+          toast('Reverted to the published catalog', 'success');
+          renderStaticBanner();
+          renderSettings();
+        } }, 'Discard local changes')),
+      fileInput,
+      h('p', { class: 'help', style: 'margin-top:12px' }, 'Orders placed on the static site are sent to you by email from the customer. The Orders page only lists orders placed in this browser.'));
+  }
+
+  async function renderStaticBanner() {
+    const box = document.getElementById('static-banner');
+    if (!App.isStatic) return;
+    const edited = await StaticApi.hasLocalEdits();
+    box.replaceChildren(h('div', { class: 'card', style: 'margin-bottom:20px; background:#fffbeb; border-color:#fcd34d' },
+      h('strong', null, 'GitHub Pages mode. '),
+      edited
+        ? h('span', null, 'You have unpublished changes saved in this browser. ',
+          h('a', { href: '#settings', onclick: (e) => { e.preventDefault(); go('settings'); } }, 'Export them to publish'), '.')
+        : h('span', null, 'Changes are saved in this browser until you export and publish them from Settings.')));
+  }
+
+  if (App.isStatic) {
+    const hint = document.getElementById('login-hint');
+    hint.textContent = `Demo admin on GitHub Pages. Password: ${StaticApi.DEMO_PASSWORD}. Changes stay in this browser until you publish them.`;
+    hint.classList.remove('hidden');
   }
 
   if (token) start();

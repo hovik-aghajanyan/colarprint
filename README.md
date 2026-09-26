@@ -1,4 +1,4 @@
-# ColarPrint
+# ColorPrint
 
 A website for a printing company. Customers choose a size, see the price straight away, start from a suggested template, and place an order. An admin panel controls every price.
 
@@ -51,11 +51,30 @@ ADMIN_PASSWORD=choose-a-password npm start
 | `ADMIN_PASSWORD` | `admin123`       | Admin login (change it!)      |
 | `DATA_FILE`      | `data/db.json`   | Where data is stored          |
 
-On first start, `data/db.json` is filled with sample products, prices and templates. Delete the file to reset to the defaults.
+On first start, `data/db.json` is filled from `public/data/catalog.json` (the sample products, prices and templates). Delete it to reset to the catalog.
 
 ```bash
 npm test   # pricing engine + API tests
 ```
+
+## GitHub Pages (static version)
+
+The site also runs on GitHub Pages without the Node server. In this mode the browser serves everything from `public/data/catalog.json`.
+
+**One-time setup:** in the repository go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. After that, every push to `main` runs the tests, builds the site and publishes it to `https://<user>.github.io/colarprint/`. The workflow is `.github/workflows/pages.yml`.
+
+How the static version differs from the server version:
+
+| | Node server | GitHub Pages |
+|---|---|---|
+| Prices, products, templates | stored in `data/db.json` | read from `public/data/catalog.json` |
+| Admin login | `ADMIN_PASSWORD` | demo password `demo` (shown on the login screen) |
+| Admin changes | saved on the server | saved in your browser until published |
+| Orders | saved on the server, managed in admin | the customer downloads the design and emails the order to the contact email |
+
+**To publish price or template changes on GitHub Pages:** open `admin.html`, make your changes, go to **Settings → Export catalog.json**, replace `public/data/catalog.json` in the repo with the downloaded file, and commit. The site redeploys automatically. The admin password on Pages is not secret, but nobody can publish anything without commit access to the repository.
+
+Build it locally with `npm run build:pages` (the output goes to `_site/`).
 
 ## Project layout
 
@@ -63,10 +82,14 @@ npm test   # pricing engine + API tests
 server.js            entry point
 src/app.js           Express routes (public + admin API)
 src/store.js         JSON file storage
-src/validate.js      input validation for admin/order data
-src/seed.js          default products, prices and templates
+src/seed.js          loads the default catalog
+scripts/build-pages.js  builds the static GitHub Pages site
 public/              storefront, designer and admin (plain HTML/CSS/JS)
+  data/catalog.json  products, prices, templates and settings
   js/pricing.js      shared pricing engine
+  js/validate.js     input validation (server + static mode)
+  js/suggest.js      template suggestions by aspect ratio
+  js/static-api.js   in-browser API used on GitHub Pages
   js/render.js       SVG renderer for templates/designs
   js/options.js      product options form + price panel
 test/                node:test suites
