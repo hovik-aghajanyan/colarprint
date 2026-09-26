@@ -6,11 +6,11 @@
   <title>Design studio — {company}</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="has-mobile-bar">
   <header class="site-header">
     <div class="container">
       <a class="brand" href="index.html"><span class="brand-mark"></span><span data-company>ColorPrint</span></a>
-      <nav class="nav"><a href="index.html#products">Products</a><a href="index.html#templates">Templates</a><a class="hide-sm" href="track.html">Track order</a></nav>
+      <nav class="nav"><a href="index.html#products">Products</a><a href="index.html#templates">Templates</a><a href="track.html">Track<span class="hide-sm"> order</span></a></nav>
     </div>
   </header>
 
@@ -59,6 +59,11 @@
   </div>
 
   <input type="file" id="file-input" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden" />
+
+  <div class="mobile-bar" id="mobile-bar">
+    <div><div class="mb-total" id="mb-total">—</div><div class="mb-sub" id="mb-sub"></div></div>
+    <button class="btn" type="button" id="mb-action">Place order</button>
+  </div>
 
   <script src="js/pricing.js"></script>
   <script src="js/render.js"></script>

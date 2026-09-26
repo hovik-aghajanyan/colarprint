@@ -64,12 +64,17 @@
   function update() {
     const result = Pricing.calculate(product, Options.toQuoteInput(state), settings);
     Options.renderPrice(priceBox, product, settings, state, result);
+    Options.updateMobileBar(settings, result);
     updatePreview();
     uploadBtn.href = `design.html?${Options.stateToQuery(product.id, state, { template: 'blank' })}`;
     history.replaceState(null, '', `?id=${encodeURIComponent(product.id)}&${Options.stateToQuery(product.id, state).replace(/^product=[^&]*&/, '')}`);
     clearTimeout(suggestTimer);
     if (state.widthMm > 0 && state.heightMm > 0) suggestTimer = setTimeout(() => loadSuggestions().catch(console.error), 250);
   }
+
+  document.getElementById('mb-action').addEventListener('click', () => {
+    document.getElementById('suggested').scrollIntoView({ behavior: 'smooth' });
+  });
 
   Options.createForm(document.getElementById('options'), product, settings, state, update);
   update();
