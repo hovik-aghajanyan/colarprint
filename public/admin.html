@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Admin — {company}</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="login" class="hidden">
+    <form class="card login-box" id="login-form">
+      <a class="brand" href="index.html" style="margin-bottom: 16px"><span class="brand-mark"></span><span data-company>ColorPrint</span></a>
+      <h2>Admin sign in</h2>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required /></div>
+      <p class="help hidden" id="login-hint"></p>
+      <p class="error-text" id="login-error"></p>
+      <button class="btn block" type="submit">Sign in</button>
+    </form>
+  </div>
+
+  <div id="shell" class="admin-shell hidden">
+    <nav class="admin-side" id="admin-nav">
+      <a class="brand" href="index.html" target="_blank" rel="noopener"><span class="brand-mark"></span><span data-company>ColorPrint</span></a>
+      <button data-view="dashboard">📊 Dashboard</button>
+      <button data-view="orders">🧾 Orders</button>
+      <button data-view="products">🏷️ Products &amp; pricing</button>
+      <button data-view="templates">🎨 Templates</button>
+      <button data-view="settings">⚙️ Settings</button>
+      <div class="spacer"></div>
+      <button id="logout">↩ Sign out</button>
+    </nav>
+    <main class="admin-main"><div id="static-banner"></div><div id="view"></div></main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal wide" role="dialog" aria-modal="true" id="modal-content"></div>
+  </div>
+
+  <script src="js/pricing.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/site-config.js"></script>
+  <script src="js/validate.js"></script>
+  <script src="js/suggest.js"></script>
+  <script src="js/static-api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/options.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

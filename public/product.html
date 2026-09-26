@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configure — {company}</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html"><span class="brand-mark"></span><span data-company>ColorPrint</span></a>
+      <nav class="nav"><a href="index.html#products">Products</a><a href="index.html#templates">Templates</a><a class="hide-sm" href="track.html">Track order</a></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="config-layout">
+      <div>
+        <p class="small"><a href="index.html#products">← All products</a></p>
+        <h1 id="product-name">Loading…</h1>
+        <p class="muted" id="product-desc"></p>
+        <div class="card" id="options"></div>
+      </div>
+
+      <aside class="price-panel">
+        <div class="card">
+          <div class="size-preview" id="size-preview"></div>
+          <div id="price" style="margin-top: 16px"></div>
+          <div style="display: grid; gap: 8px; margin-top: 16px">
+            <a class="btn block lg" id="design-btn" href="#suggested">Choose a design</a>
+            <a class="btn block secondary" id="upload-btn" href="#">Upload my own artwork</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section id="suggested" style="padding-top: 0">
+      <div class="section-head">
+        <div>
+          <h2>Suggested templates for your size</h2>
+          <p class="muted" id="suggest-hint">Ranked by how well each layout fits your chosen proportions.</p>
+        </div>
+      </div>
+      <div class="grid" id="suggest-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© <span data-year></span> <span data-company></span></div>
+      <div><span data-contact-email></span> · <span data-contact-phone></span></div>
+    </div>
+  </footer>
+
+  <script src="js/pricing.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/site-config.js"></script>
+  <script src="js/validate.js"></script>
+  <script src="js/suggest.js"></script>
+  <script src="js/static-api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/options.js"></script>
+  <script src="js/product.js"></script>
+</body>
+</html>
