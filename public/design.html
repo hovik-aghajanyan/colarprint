@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design studio — {company}</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/"><span class="brand-mark"></span><span data-company>ColarPrint</span></a>
+      <nav class="nav"><a href="/#products">Products</a><a href="/#templates">Templates</a><a class="hide-sm" href="/track">Track order</a></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="padding-top: 24px">
+      <p class="small"><a id="back-link" href="/">← Back to product</a></p>
+      <h1 id="design-title" style="font-size: 1.8rem">Design studio</h1>
+      <p class="muted" id="fit-hint"></p>
+    </div>
+
+    <div class="designer">
+      <aside>
+        <div class="card" id="options"></div>
+      </aside>
+
+      <div class="canvas-col">
+        <div class="toolbar" style="margin-bottom: 12px">
+          <button class="btn secondary small" id="add-text" type="button">+ Text</button>
+          <button class="btn secondary small" id="add-image" type="button">+ Image / logo</button>
+          <label class="btn secondary small" style="margin: 0">Background <input type="color" id="bg-color" style="width: 28px; height: 22px; border: 0; padding: 0" /></label>
+          <span style="flex: 1"></span>
+          <button class="btn ghost small" id="reset" type="button">Reset</button>
+          <button class="btn secondary small" id="download" type="button">Download preview</button>
+        </div>
+        <div class="canvas-wrap" id="canvas"></div>
+        <p class="help">Click an element to select it, drag to move it. Arrow keys nudge, Delete removes.</p>
+      </div>
+
+      <aside>
+        <div class="card" style="margin-bottom: 16px">
+          <div id="price"></div>
+          <button class="btn block lg" id="order-btn" type="button" style="margin-top: 12px">Place order</button>
+        </div>
+        <div class="card">
+          <h3>Layers</h3>
+          <div id="layers"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="modal-backdrop hidden" id="order-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
+      <div id="order-content"></div>
+    </div>
+  </div>
+
+  <input type="file" id="file-input" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden" />
+
+  <script src="/js/pricing.js"></script>
+  <script src="/js/render.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/options.js"></script>
+  <script src="/js/designer.js"></script>
+</body>
+</html>

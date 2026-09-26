@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{company} — Custom printing, any size</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/"><span class="brand-mark"></span><span data-company>ColarPrint</span></a>
+      <nav class="nav">
+        <a href="/#products">Products</a>
+        <a href="/#templates">Templates</a>
+        <a class="hide-sm" href="/track">Track order</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div>
+        <h1>Print anything.<br />Any size. Instant price.</h1>
+        <p class="lead" data-tagline></p>
+        <p class="lead">Pick a product, type your exact dimensions and watch the price update live. Start from a template or upload your own artwork.</p>
+        <div class="row" style="max-width: 420px">
+          <a class="btn lg" href="#products">Get a price</a>
+          <a class="btn lg secondary" href="#templates">Browse templates</a>
+        </div>
+      </div>
+      <div class="hero-art" id="hero-art"></div>
+    </div>
+  </section>
+
+  <section id="products">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>What would you like to print?</h2>
+          <p class="muted">Prices are based on print area, so you only pay for the size you need.</p>
+        </div>
+      </div>
+      <div class="grid" id="product-grid"></div>
+    </div>
+  </section>
+
+  <section style="background: var(--surface)">
+    <div class="container">
+      <h2>How it works</h2>
+      <div class="steps" style="margin-top: 20px">
+        <div class="step"><h3>Choose size &amp; options</h3><p class="muted">Pick a standard size or enter custom dimensions in mm, cm or inches. Choose colors, paper and finishes.</p></div>
+        <div class="step"><h3>Design it</h3><p class="muted">We suggest templates that fit your size. Edit the text, colors and add your logo in the browser.</p></div>
+        <div class="step"><h3>See the price, order</h3><p class="muted">The price updates as you go, with bulk discounts shown. Place the order and we start printing.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="templates">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Start from a template</h2>
+          <p class="muted">Every template adapts to the size you choose.</p>
+        </div>
+        <div class="filters" id="template-filters"></div>
+      </div>
+      <div class="grid" id="template-grid"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© <span data-year></span> <span data-company></span></div>
+      <div><span data-contact-email></span> · <span data-contact-phone></span></div>
+    </div>
+  </footer>
+
+  <script src="/js/pricing.js"></script>
+  <script src="/js/render.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/options.js"></script>
+  <script src="/js/home.js"></script>
+</body>
+</html>

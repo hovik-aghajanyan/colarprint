@@ -1,0 +1,19 @@
+{
+  "name": "colarprint",
+  "version": "1.0.0",
+  "description": "Printing company website with size-based price calculator, design templates and admin panel",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

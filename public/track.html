@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Track order — {company}</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/"><span class="brand-mark"></span><span data-company>ColarPrint</span></a>
+      <nav class="nav"><a href="/#products">Products</a><a href="/#templates">Templates</a><a href="/track">Track order</a></nav>
+    </div>
+  </header>
+  <section>
+    <div class="container" style="max-width: 560px">
+      <h1>Track your order</h1>
+      <form class="card" id="track-form">
+        <div class="field"><label for="order-id">Order number</label><input id="order-id" type="text" required placeholder="ORD-…" /></div>
+        <div class="field"><label for="order-email">Email used for the order</label><input id="order-email" type="email" required /></div>
+        <button class="btn" type="submit">Check status</button>
+      </form>
+      <div id="track-result" style="margin-top: 20px"></div>
+    </div>
+  </section>
+  <script src="/js/pricing.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    (async function () {
+      const { api, h, qs, initShell } = App;
+      const settings = await initShell();
+      const labels = { new: 'Received', in_production: 'In production', ready: 'Ready for pickup', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled' };
+      const form = document.getElementById('track-form');
+      const out = document.getElementById('track-result');
+      if (qs('id')) document.getElementById('order-id').value = qs('id');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        out.replaceChildren();
+        try {
+          const id = document.getElementById('order-id').value.trim();
+          const email = document.getElementById('order-email').value.trim();
+          const o = await api(`/api/orders/${encodeURIComponent(id)}?email=${encodeURIComponent(email)}`);
+          out.appendChild(h('div', { class: 'card' },
+            h('h3', null, `Order ${o.id}`),
+            h('p', null, h('span', { class: `badge status-${o.status}` }, labels[o.status] || o.status)),
+            h('p', { class: 'muted' }, `${o.productName} · ${o.quote.quantity} pcs · ${App.fmtNum(o.quote.widthMm)} × ${App.fmtNum(o.quote.heightMm)} mm`),
+            h('p', null, 'Total: ', h('strong', null, Pricing.formatMoney(o.quote.total, { currency: o.currency || settings.currency }))),
+            h('p', { class: 'small muted' }, `Placed ${new Date(o.createdAt).toLocaleString()}`)
+          ));
+        } catch (err) {
+          out.appendChild(h('p', { class: 'error-text' }, 'We could not find an order with that number and email.'));
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
