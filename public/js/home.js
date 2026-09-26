@@ -14,7 +14,7 @@
       : [{ width: product.minWidth, height: product.minHeight }];
     let best = null;
     for (const s of sizes) {
-      const r = Pricing.calculate(product, { ...Options.toQuoteInput(base), widthMm: s.width, heightMm: s.height, quantity: product.minQuantity || 1 }, settings);
+      const r = Pricing.calculate(product, { ...Options.toQuoteInput(base), width: s.width, height: s.height, quantity: product.minQuantity || 1 }, settings);
       if (r.ok && (best === null || r.breakdown.total < best)) best = r.breakdown.total;
     }
     return best;

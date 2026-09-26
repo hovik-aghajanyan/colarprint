@@ -37,8 +37,8 @@ function createApp(store, { adminPassword }) {
     Pricing.calculate(
       product,
       {
-        widthMm: body.widthMm,
-        heightMm: body.heightMm,
+        width: body.width,
+        height: body.height,
         quantity: body.quantity,
         colorId: body.colorId,
         materialId: body.materialId,
@@ -120,7 +120,7 @@ function createApp(store, { adminPassword }) {
         status: 'new',
         productId: product.id,
         productName: product.name,
-        displayUnit: ['mm', 'cm', 'in'].includes(body.displayUnit) ? body.displayUnit : 'mm',
+        displayUnit: body.displayUnit === 'ft' ? 'ft' : 'in',
         quote: quote.breakdown,
         currency: store.settings.currency,
         customer,

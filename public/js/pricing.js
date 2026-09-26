@@ -11,16 +11,18 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  const UNIT_TO_MM = { mm: 1, cm: 10, in: 25.4 };
+  // All sizes are stored in inches and priced per square foot (US units).
+  const UNIT_TO_IN = { in: 1, ft: 12 };
+  const SQ_IN_PER_SQ_FT = 144;
 
-  function toMm(value, unit) {
-    const factor = UNIT_TO_MM[unit] || 1;
+  function toInches(value, unit) {
+    const factor = UNIT_TO_IN[unit] || 1;
     return Number(value) * factor;
   }
 
-  function fromMm(valueMm, unit) {
-    const factor = UNIT_TO_MM[unit] || 1;
-    return Number(valueMm) / factor;
+  function fromInches(inches, unit) {
+    const factor = UNIT_TO_IN[unit] || 1;
+    return Number(inches) / factor;
   }
 
   function round2(n) {
@@ -46,7 +48,7 @@
    * Calculates a price quote.
    *
    * @param {object} product  product definition (see src/seed.js)
-   * @param {object} options  { widthMm, heightMm, quantity, colorId, materialId, sideId, finishIds, turnaroundId }
+   * @param {object} options  { width, height (inches), quantity, colorId, materialId, sideId, finishIds, turnaroundId }
    * @param {object} settings { taxRate, turnarounds }
    * @returns {{ ok: boolean, errors: string[], breakdown: object|null }}
    */
@@ -59,17 +61,17 @@
       return { ok: false, errors: ['Unknown product'], breakdown: null };
     }
 
-    const widthMm = Number(options.widthMm);
-    const heightMm = Number(options.heightMm);
+    const width = Number(options.width);
+    const height = Number(options.height);
     const quantity = Math.floor(Number(options.quantity));
 
-    if (!(widthMm > 0) || !(heightMm > 0)) {
+    if (!(width > 0) || !(height > 0)) {
       errors.push('Width and height must be positive numbers');
     } else {
-      if (product.minWidth && widthMm < product.minWidth) errors.push(`Width must be at least ${product.minWidth} mm`);
-      if (product.maxWidth && widthMm > product.maxWidth) errors.push(`Width must be at most ${product.maxWidth} mm`);
-      if (product.minHeight && heightMm < product.minHeight) errors.push(`Height must be at least ${product.minHeight} mm`);
-      if (product.maxHeight && heightMm > product.maxHeight) errors.push(`Height must be at most ${product.maxHeight} mm`);
+      if (product.minWidth && width < product.minWidth) errors.push(`Width must be at least ${product.minWidth} in`);
+      if (product.maxWidth && width > product.maxWidth) errors.push(`Width must be at most ${product.maxWidth} in`);
+      if (product.minHeight && height < product.minHeight) errors.push(`Height must be at least ${product.minHeight} in`);
+      if (product.maxHeight && height > product.maxHeight) errors.push(`Height must be at most ${product.maxHeight} in`);
     }
 
     const minQty = Math.max(1, Number(product.minQuantity) || 1);
@@ -98,19 +100,19 @@
 
     if (errors.length) return { ok: false, errors, breakdown: null };
 
-    const areaSqm = (widthMm * heightMm) / 1e6;
-    const ratePerSqm = Number(product.pricePerSqm || 0) + Number((material && material.pricePerSqm) || 0);
+    const areaSqft = (width * height) / SQ_IN_PER_SQ_FT;
+    const ratePerSqft = Number(product.pricePerSqft || 0) + Number((material && material.pricePerSqft) || 0);
     const colorMultiplier = Number((color && color.multiplier) || 1);
     const sideMultiplier = Number((side && side.multiplier) || 1);
 
-    const rawPrintCost = areaSqm * ratePerSqm * colorMultiplier * sideMultiplier;
+    const rawPrintCost = areaSqft * ratePerSqft * colorMultiplier * sideMultiplier;
     const minUnitPrice = Number(product.minUnitPrice || 0);
     const unitPrint = Math.max(rawPrintCost, minUnitPrice);
 
     let finishPerUnit = 0;
     let finishFlat = 0;
     const finishLines = finishes.map((f) => {
-      const perUnit = Number(f.perUnit || 0) + Number(f.perSqm || 0) * areaSqm;
+      const perUnit = Number(f.perUnit || 0) + Number(f.perSqft || 0) * areaSqft;
       const flat = Number(f.flat || 0);
       finishPerUnit += perUnit;
       finishFlat += flat;
@@ -137,14 +139,14 @@
       ok: true,
       errors: [],
       breakdown: {
-        widthMm,
-        heightMm,
+        width,
+        height,
         quantity,
-        areaSqm: Math.round(areaSqm * 10000) / 10000,
-        totalAreaSqm: Math.round(areaSqm * quantity * 10000) / 10000,
-        ratePerSqm: round2(ratePerSqm),
+        areaSqft: Math.round(areaSqft * 1000) / 1000,
+        totalAreaSqft: Math.round(areaSqft * quantity * 1000) / 1000,
+        ratePerSqft: round2(ratePerSqft),
         color: color ? { id: color.id, name: color.name, multiplier: colorMultiplier } : null,
-        material: material ? { id: material.id, name: material.name, pricePerSqm: Number(material.pricePerSqm || 0) } : null,
+        material: material ? { id: material.id, name: material.name, pricePerSqft: Number(material.pricePerSqft || 0) } : null,
         side: side ? { id: side.id, name: side.name, multiplier: sideMultiplier } : null,
         turnaround: turnaround
           ? { id: turnaround.id, name: turnaround.name, days: turnaround.days, multiplier: turnaroundMultiplier }
@@ -176,5 +178,24 @@
     }
   }
 
-  return { calculate, toMm, fromMm, round2, tierFor, formatMoney, UNIT_TO_MM };
+    // Formats inches for display: whole numbers stay whole, otherwise up to 3 decimals (e.g. 3.5, 8.5, 0.125).
+  function formatInches(inches) {
+    return String(Math.round(Number(inches) * 1000) / 1000);
+  }
+
+  // "3.5 × 2 in" or, for large prints, "6 × 3 ft".
+  function formatSize(width, height, unit) {
+    unit = unit || 'in';
+    const w = formatInches(fromInches(width, unit));
+    const h = formatInches(fromInches(height, unit));
+    return `${w} × ${h} ${unit}`;
+  }
+
+  // "7 sq in" for small prints, "8 sq ft" for large ones.
+  function formatArea(sqft) {
+    if (sqft < 1) return `${Math.round(sqft * SQ_IN_PER_SQ_FT * 10) / 10} sq in`;
+    return `${Math.round(sqft * 100) / 100} sq ft`;
+  }
+
+  return { calculate, toInches, fromInches, formatInches, formatSize, formatArea, round2, tierFor, formatMoney, UNIT_TO_IN, SQ_IN_PER_SQ_FT };
 });

@@ -12,26 +12,26 @@ const settings = {
 
 const product = {
   id: 'p',
-  pricePerSqm: 100,
+  pricePerSqft: 10,
   minUnitPrice: 0,
   setupFee: 0,
   minQuantity: 1,
-  minWidth: 10, maxWidth: 2000, minHeight: 10, maxHeight: 2000,
+  minWidth: 1, maxWidth: 120, minHeight: 1, maxHeight: 120,
   colorOptions: [
     { id: 'bw', name: 'B/W', multiplier: 1 },
     { id: 'color', name: 'Color', multiplier: 2 },
   ],
   materials: [
-    { id: 'std', name: 'Standard', pricePerSqm: 0 },
-    { id: 'premium', name: 'Premium', pricePerSqm: 50 },
+    { id: 'std', name: 'Standard', pricePerSqft: 0 },
+    { id: 'premium', name: 'Premium', pricePerSqft: 5 },
   ],
   sides: [
     { id: 'single', name: 'Single', multiplier: 1 },
     { id: 'double', name: 'Double', multiplier: 1.5 },
   ],
   finishes: [
-    { id: 'lam', name: 'Laminate', perUnit: 0, perSqm: 10, flat: 0 },
-    { id: 'setup', name: 'Die', perUnit: 1, perSqm: 0, flat: 20 },
+    { id: 'lam', name: 'Laminate', perUnit: 0, perSqft: 1, flat: 0 },
+    { id: 'setup', name: 'Die', perUnit: 1, perSqft: 0, flat: 20 },
   ],
   quantityTiers: [
     { minQty: 10, discountPct: 10 },
@@ -39,24 +39,26 @@ const product = {
   ],
 };
 
-const base = { widthMm: 1000, heightMm: 1000, quantity: 1 };
+// 12 × 12 in = 1 sq ft
+const base = { width: 12, height: 12, quantity: 1 };
 
 test('price scales with area', () => {
   const one = Pricing.calculate(product, base, settings);
-  const half = Pricing.calculate(product, { ...base, heightMm: 500 }, settings);
+  const half = Pricing.calculate(product, { ...base, height: 6 }, settings);
   assert.equal(one.ok, true);
-  assert.equal(one.breakdown.total, 100);
-  assert.equal(half.breakdown.total, 50);
+  assert.equal(one.breakdown.areaSqft, 1);
+  assert.equal(one.breakdown.total, 10);
+  assert.equal(half.breakdown.total, 5);
 });
 
 test('color, material and sides modify the print cost', () => {
   const r = Pricing.calculate(product, { ...base, colorId: 'color', materialId: 'premium', sideId: 'double' }, settings);
-  // 1 m² × (100 + 50) × 2 × 1.5
-  assert.equal(r.breakdown.unitPrice, 450);
+  // 1 sq ft × (10 + 5) × 2 × 1.5
+  assert.equal(r.breakdown.unitPrice, 45);
 });
 
 test('minimum piece price applies to tiny prints', () => {
-  const r = Pricing.calculate({ ...product, minUnitPrice: 5 }, { ...base, widthMm: 10, heightMm: 10 }, settings);
+  const r = Pricing.calculate({ ...product, minUnitPrice: 5 }, { ...base, width: 1, height: 1 }, settings);
   assert.equal(r.breakdown.unitPrice, 5);
   assert.equal(r.breakdown.minUnitPriceApplied, true);
 });
@@ -66,26 +68,26 @@ test('quantity tiers pick the highest reached tier', () => {
   assert.equal(Pricing.calculate(product, { ...base, quantity: 10 }, settings).breakdown.discountPct, 10);
   const r = Pricing.calculate(product, { ...base, quantity: 150 }, settings);
   assert.equal(r.breakdown.discountPct, 20);
-  assert.equal(r.breakdown.total, 150 * 100 * 0.8);
+  assert.equal(r.breakdown.total, 150 * 10 * 0.8);
 });
 
-test('finishes add per-piece, per-m² and flat fees', () => {
+test('finishes add per-piece, per-sq-ft and flat fees', () => {
   const r = Pricing.calculate(product, { ...base, quantity: 2, finishIds: ['lam', 'setup'] }, settings);
-  // unit = 100 + 10 (lam) + 1 = 111; ×2 = 222; + 20 flat
-  assert.equal(r.breakdown.unitPrice, 111);
-  assert.equal(r.breakdown.total, 242);
+  // unit = 10 + 1 (lam) + 1 = 12; ×2 = 24; + 20 flat
+  assert.equal(r.breakdown.unitPrice, 12);
+  assert.equal(r.breakdown.total, 44);
 });
 
 test('turnaround, setup fee and tax', () => {
   const r = Pricing.calculate({ ...product, setupFee: 10 }, { ...base, turnaroundId: 'express' }, { ...settings, taxRate: 10 });
-  // 100 + 50 rush + 10 setup = 160, +10% tax
-  assert.equal(r.breakdown.rushFee, 50);
-  assert.equal(r.breakdown.net, 160);
-  assert.equal(r.breakdown.total, 176);
+  // 10 + 5 rush + 10 setup = 25, +10% tax
+  assert.equal(r.breakdown.rushFee, 5);
+  assert.equal(r.breakdown.net, 25);
+  assert.equal(r.breakdown.total, 27.5);
 });
 
 test('rejects sizes outside the limits and too-small quantities', () => {
-  const r = Pricing.calculate({ ...product, minQuantity: 5 }, { widthMm: 5000, heightMm: 1, quantity: 1 }, settings);
+  const r = Pricing.calculate({ ...product, minQuantity: 5 }, { width: 500, height: 0.5, quantity: 1 }, settings);
   assert.equal(r.ok, false);
   assert.equal(r.errors.length, 3);
 });
@@ -97,8 +99,10 @@ test('rejects unknown options', () => {
   assert.match(r.errors.join(' '), /bogus/);
 });
 
-test('unit conversion', () => {
-  assert.equal(Pricing.toMm(2, 'in'), 50.8);
-  assert.equal(Pricing.toMm(3, 'cm'), 30);
-  assert.equal(Pricing.fromMm(254, 'in'), 10);
+test('unit conversion and formatting', () => {
+  assert.equal(Pricing.toInches(3, 'ft'), 36);
+  assert.equal(Pricing.toInches(8.5, 'in'), 8.5);
+  assert.equal(Pricing.fromInches(72, 'ft'), 6);
+  assert.equal(Pricing.formatSize(8.5, 11), '8.5 × 11 in');
+  assert.equal(Pricing.formatSize(72, 36, 'ft'), '6 × 3 ft');
 });

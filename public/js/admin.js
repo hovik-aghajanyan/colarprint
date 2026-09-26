@@ -110,6 +110,19 @@
 
   const money = (n, currency) => Pricing.formatMoney(n, { currency: currency || settings.currency });
 
+  // Order size in inches/feet; orders saved before the switch to US units stored millimetres.
+  function orderSize(o) {
+    const b = o.quote;
+    const w = b.width !== undefined ? b.width : b.widthMm / 25.4;
+    const hgt = b.height !== undefined ? b.height : b.heightMm / 25.4;
+    return Pricing.formatSize(w, hgt, o.displayUnit === 'ft' ? 'ft' : 'in');
+  }
+  function orderArea(o) {
+    const b = o.quote;
+    const sqft = b.areaSqft !== undefined ? b.areaSqft : b.areaSqm * 10.7639;
+    return Pricing.formatArea(sqft);
+  }
+
   // ---------- Generic editable table ----------
   /**
    * rows: array (mutated in place). columns: [{ key, label, type: 'text'|'number'|'color', step, width }]
@@ -198,7 +211,7 @@
           h('td', null, new Date(o.createdAt).toLocaleDateString()),
           h('td', null, o.customer.name, h('div', { class: 'small muted' }, o.customer.email)),
           h('td', null, o.productName),
-          h('td', null, `${fmtNum(o.quote.widthMm)} × ${fmtNum(o.quote.heightMm)} mm`),
+          h('td', null, orderSize(o)),
           h('td', null, fmtNum(o.quote.quantity)),
           h('td', null, money(o.quote.total, o.currency)),
           h('td', null, statusSelect(o, reload)),
@@ -255,7 +268,7 @@
     const design = o.design;
     let preview = null;
     if (design) {
-      const svg = Render.renderDesign(design, b.widthMm, b.heightMm);
+      const svg = Render.renderDesign(design, b.width, b.height);
       preview = h('div', null,
         h('div', { class: 'design-thumb', style: 'aspect-ratio:auto; min-height:220px' }, svg),
         h('div', { class: 'toolbar', style: 'margin-top:8px' },
@@ -292,7 +305,7 @@
           h('div', { class: 'field' }, h('label', null, 'Status'), statusSelect(o, reload)),
           h('table', { class: 'data' }, h('tbody', null,
             row('Product', o.productName),
-            row('Size', `${fmtNum(b.widthMm)} × ${fmtNum(b.heightMm)} mm (${b.areaSqm} m²)`),
+            row('Size', `${orderSize(o)} (${orderArea(o)})`),
             row('Quantity', fmtNum(b.quantity)),
             row('Colors', b.color ? b.color.name : '—'),
             row('Material', b.material ? b.material.name : '—'),
@@ -324,14 +337,14 @@
     const products = await adminApi('/products');
     view.replaceChildren(
       h('div', { class: 'section-head' },
-        h('div', null, h('h1', null, 'Products & pricing'), h('p', { class: 'muted' }, 'Set the price per m², size limits, colors, materials, finishes and bulk discounts.')),
+        h('div', null, h('h1', null, 'Products & pricing'), h('p', { class: 'muted' }, 'Set the price per sq ft, size limits, colors, materials, finishes and bulk discounts.')),
         h('button', { class: 'btn', onclick: () => editProduct(null) }, '+ New product')),
       h('div', { class: 'card' }, h('div', { class: 'table-wrap' }, h('table', { class: 'data' },
-        h('thead', null, h('tr', null, ...['', 'Product', 'Price / m²', 'Min piece', 'Setup fee', 'Min qty', 'Status', ''].map((t) => h('th', null, t)))),
+        h('thead', null, h('tr', null, ...['', 'Product', 'Price / sq ft', 'Min piece', 'Setup fee', 'Min qty', 'Status', ''].map((t) => h('th', null, t)))),
         h('tbody', null, products.map((p) => h('tr', null,
           h('td', { style: 'font-size:1.5rem; width:1%' }, p.icon),
           h('td', null, h('strong', null, p.name), h('div', { class: 'small muted' }, `${p.sizePresets.length} sizes · ${p.colorOptions.length} color options · ${p.materials.length} materials`)),
-          h('td', null, money(p.pricePerSqm)),
+          h('td', null, money(p.pricePerSqft)),
           h('td', null, money(p.minUnitPrice)),
           h('td', null, money(p.setupFee)),
           h('td', null, fmtNum(p.minQuantity)),
@@ -348,11 +361,11 @@
     const p = existing
       ? JSON.parse(JSON.stringify(existing))
       : {
-          name: '', icon: '🖨️', description: '', active: true, pricePerSqm: 20, minUnitPrice: 1, setupFee: 0, minQuantity: 1,
+          name: '', icon: '🖨️', description: '', active: true, pricePerSqft: 2, displayUnit: 'in', minUnitPrice: 1, setupFee: 0, minQuantity: 1,
           minWidth: 50, maxWidth: 1000, minHeight: 50, maxHeight: 1000, allowCustomSize: true,
-          sizePresets: [{ id: '', name: 'A4 (210 × 297 mm)', width: 210, height: 297 }],
+          sizePresets: [{ id: '', name: 'Letter (8.5 × 11 in)', width: 8.5, height: 11 }],
           colorOptions: [{ id: 'bw', name: 'Black & White', multiplier: 1 }, { id: 'cmyk', name: 'Full Color (CMYK)', multiplier: 1.6 }],
-          materials: [{ id: '', name: 'Standard paper', pricePerSqm: 0 }],
+          materials: [{ id: '', name: 'Standard paper', pricePerSqft: 0 }],
           sides: [{ id: 'single', name: 'Single sided', multiplier: 1 }],
           finishes: [],
           quantityTiers: [],
@@ -368,14 +381,14 @@
       const withIds = (list) => list.map((x, i) => ({ ...x, id: x.id || `opt-${i}` }));
       return {
         ...p,
-        pricePerSqm: num(p.pricePerSqm, 0), minUnitPrice: num(p.minUnitPrice, 0), setupFee: num(p.setupFee, 0),
+        pricePerSqft: num(p.pricePerSqft, 0), minUnitPrice: num(p.minUnitPrice, 0), setupFee: num(p.setupFee, 0),
         minQuantity: num(p.minQuantity, 1), minWidth: num(p.minWidth, 1), maxWidth: num(p.maxWidth, 1e4),
         minHeight: num(p.minHeight, 1), maxHeight: num(p.maxHeight, 1e4),
         sizePresets: withIds(p.sizePresets).map((s) => ({ ...s, width: num(s.width, 0), height: num(s.height, 0) })),
         colorOptions: withIds(p.colorOptions).map((c) => ({ ...c, multiplier: num(c.multiplier, 1) })),
-        materials: withIds(p.materials).map((m) => ({ ...m, pricePerSqm: num(m.pricePerSqm, 0) })),
+        materials: withIds(p.materials).map((m) => ({ ...m, pricePerSqft: num(m.pricePerSqft, 0) })),
         sides: withIds(p.sides).map((s) => ({ ...s, multiplier: num(s.multiplier, 1) })),
-        finishes: withIds(p.finishes).map((f) => ({ ...f, perUnit: num(f.perUnit, 0), perSqm: num(f.perSqm, 0), flat: num(f.flat, 0) })),
+        finishes: withIds(p.finishes).map((f) => ({ ...f, perUnit: num(f.perUnit, 0), perSqft: num(f.perSqft, 0), flat: num(f.flat, 0) })),
         quantityTiers: p.quantityTiers.map((t) => ({ minQty: num(t.minQty, 1), discountPct: num(t.discountPct, 0) })),
       };
     }
@@ -386,10 +399,10 @@
       testState = Options.defaultState(draft, settings);
       if (prev) {
         // Keep the tester's size/quantity when the admin edits prices.
-        Object.assign(testState, { unit: prev.unit, widthMm: prev.widthMm, heightMm: prev.heightMm, quantity: prev.quantity });
+        Object.assign(testState, { unit: prev.unit, width: prev.width, height: prev.height, quantity: prev.quantity });
         const keep = (list, key) => { if (list.some((x) => x.id === prev[key])) testState[key] = prev[key]; };
         keep(draft.colorOptions, 'colorId'); keep(draft.materials, 'materialId'); keep(draft.sides, 'sideId');
-        const match = draft.sizePresets.find((s) => s.width === prev.widthMm && s.height === prev.heightMm);
+        const match = draft.sizePresets.find((s) => s.width === prev.width && s.height === prev.height);
         testState.presetId = match ? match.id : draft.allowCustomSize ? 'custom' : testState.presetId;
         testState.finishIds = prev.finishIds.filter((id) => draft.finishes.some((f) => f.id === id));
       }
@@ -440,48 +453,53 @@
               h('div', { style: 'flex:0 0 90px' }, inputField(p, 'icon', 'Icon')),
               inputField(p, 'name', 'Name')),
             inputField(p, 'description', 'Description', { type: 'textarea' }),
+            h('div', { class: 'field', style: 'max-width:260px' },
+              h('label', { for: 'f-displayUnit' }, 'Show sizes to customers in'),
+              h('select', { id: 'f-displayUnit', onchange: (e) => { p.displayUnit = e.target.value; changed(); } },
+                h('option', { value: 'in', selected: p.displayUnit !== 'ft' }, 'Inches (in)'),
+                h('option', { value: 'ft', selected: p.displayUnit === 'ft' }, 'Feet (ft), for banners'))),
             checkboxField(p, 'active', 'Visible in the shop')),
-          section('Base pricing', 'Piece price = area (m²) × (price per m² + material extra) × color multiplier × sides multiplier, never below the minimum piece price.',
+          section('Base pricing', 'Piece price = area (sq ft) × (price per sq ft + material extra) × color multiplier × sides multiplier, never below the minimum piece price.',
             h('div', { class: 'row' },
-              inputField(p, 'pricePerSqm', `Price per m² (${settings.currency})`, { type: 'number', step: '0.01', onChange: changed }),
+              inputField(p, 'pricePerSqft', `Price per sq ft (${settings.currency})`, { type: 'number', step: '0.01', onChange: changed }),
               inputField(p, 'minUnitPrice', 'Minimum price per piece', { type: 'number', step: '0.01', onChange: changed }),
               inputField(p, 'setupFee', 'Setup fee per order', { type: 'number', step: '0.01', onChange: changed }),
               inputField(p, 'minQuantity', 'Minimum quantity', { type: 'number', step: '1', onChange: changed }))),
-          section('Size limits (mm)', 'Customers can enter any size inside these limits when custom sizes are allowed.',
+          section('Size limits (inches)', 'Customers can enter any size inside these limits when custom sizes are allowed.',
             h('div', { class: 'row' },
-              inputField(p, 'minWidth', 'Min width', { type: 'number', onChange: changed }),
-              inputField(p, 'maxWidth', 'Max width', { type: 'number', onChange: changed }),
-              inputField(p, 'minHeight', 'Min height', { type: 'number', onChange: changed }),
-              inputField(p, 'maxHeight', 'Max height', { type: 'number', onChange: changed })),
+              inputField(p, 'minWidth', 'Min width', { type: 'number', step: '0.125', onChange: changed }),
+              inputField(p, 'maxWidth', 'Max width', { type: 'number', step: '0.125', onChange: changed }),
+              inputField(p, 'minHeight', 'Min height', { type: 'number', step: '0.125', onChange: changed }),
+              inputField(p, 'maxHeight', 'Max height', { type: 'number', step: '0.125', onChange: changed })),
             checkboxField(p, 'allowCustomSize', 'Allow custom sizes', changed)),
-          section('Size presets', 'Standard sizes shown as quick picks (millimetres).',
+          section('Size presets', 'Standard sizes shown as quick picks, in inches (e.g. 8.5 × 11, or 72 × 36 for a 6 × 3 ft banner).',
             tableEditor(p.sizePresets, [
               { key: 'name', label: 'Name' },
-              { key: 'width', label: 'Width (mm)', type: 'number', width: '120px' },
-              { key: 'height', label: 'Height (mm)', type: 'number', width: '120px' },
+              { key: 'width', label: 'Width (in)', type: 'number', step: '0.125', width: '120px' },
+              { key: 'height', label: 'Height (in)', type: 'number', step: '0.125', width: '120px' },
             ], { newRow: () => ({ id: '', name: '', width: 100, height: 100 }), onChange: changed, addLabel: '+ Add size' })),
           section('Color options', 'Multiplier on the print cost, e.g. 1 = base price, 1.6 = 60% more for full color.',
             tableEditor(p.colorOptions, [
               { key: 'name', label: 'Name' },
               { key: 'multiplier', label: 'Multiplier', type: 'number', step: '0.05', width: '120px' },
             ], { newRow: () => ({ id: '', name: '', multiplier: 1 }), onChange: changed, addLabel: '+ Add color option' })),
-          section('Materials', 'Extra price per m² added to the base price (can be 0 or negative).',
+          section('Materials', 'Extra price per sq ft added to the base price (can be 0 or negative).',
             tableEditor(p.materials, [
               { key: 'name', label: 'Name' },
-              { key: 'pricePerSqm', label: 'Extra / m²', type: 'number', step: '0.01', width: '120px' },
-            ], { newRow: () => ({ id: '', name: '', pricePerSqm: 0 }), onChange: changed, addLabel: '+ Add material' })),
+              { key: 'pricePerSqft', label: 'Extra / sq ft', type: 'number', step: '0.01', width: '120px' },
+            ], { newRow: () => ({ id: '', name: '', pricePerSqft: 0 }), onChange: changed, addLabel: '+ Add material' })),
           section('Printed sides', 'Multiplier on the print cost.',
             tableEditor(p.sides, [
               { key: 'name', label: 'Name' },
               { key: 'multiplier', label: 'Multiplier', type: 'number', step: '0.05', width: '120px' },
             ], { newRow: () => ({ id: '', name: '', multiplier: 1 }), onChange: changed, addLabel: '+ Add option' })),
-          section('Finishing options', 'Optional extras. Per piece + per m² are charged on every piece; the flat fee once per order.',
+          section('Finishing options', 'Optional extras. Per piece + per sq ft are charged on every piece; the flat fee once per order.',
             tableEditor(p.finishes, [
               { key: 'name', label: 'Name' },
               { key: 'perUnit', label: 'Per piece', type: 'number', step: '0.01', width: '100px' },
-              { key: 'perSqm', label: 'Per m²', type: 'number', step: '0.01', width: '100px' },
+              { key: 'perSqft', label: 'Per sq ft', type: 'number', step: '0.01', width: '100px' },
               { key: 'flat', label: 'Flat fee', type: 'number', step: '0.01', width: '100px' },
-            ], { newRow: () => ({ id: '', name: '', perUnit: 0, perSqm: 0, flat: 0 }), onChange: changed, addLabel: '+ Add finish' })),
+            ], { newRow: () => ({ id: '', name: '', perUnit: 0, perSqft: 0, flat: 0 }), onChange: changed, addLabel: '+ Add finish' })),
           section('Quantity discounts', 'The highest tier the quantity reaches applies.',
             tableEditor(p.quantityTiers, [
               { key: 'minQty', label: 'From quantity', type: 'number', step: '1' },
@@ -535,7 +553,7 @@
   function editTemplate(existing, products, isCopy) {
     const t = existing
       ? JSON.parse(JSON.stringify(existing))
-      : { name: '', category: 'General', productIds: [], width: 210, height: 297, background: '#ffffff', tags: [], elements: [ELEMENT_DEFAULTS.text()] };
+      : { name: '', category: 'General', productIds: [], width: 8.5, height: 11, background: '#ffffff', tags: [], elements: [ELEMENT_DEFAULTS.text()] };
     t.elements.forEach((e, i) => { if (!e.id) e.id = `${e.type}-${i}`; });
     const isNew = !existing || isCopy;
 
@@ -608,8 +626,8 @@
           h('div', { class: 'card editor-section' },
             h('div', { class: 'row' }, inputField(t, 'name', 'Name'), inputField(t, 'category', 'Category')),
             h('div', { class: 'row' },
-              inputField(t, 'width', 'Design width (mm)', { type: 'number', onChange: drawPreview, help: 'Sets the shape it is designed for; used to suggest it for matching sizes.' }),
-              inputField(t, 'height', 'Design height (mm)', { type: 'number', onChange: drawPreview }),
+              inputField(t, 'width', 'Design width (in)', { type: 'number', onChange: drawPreview, help: 'Sets the shape it is designed for; used to suggest it for matching sizes.' }),
+              inputField(t, 'height', 'Design height (in)', { type: 'number', onChange: drawPreview }),
               h('div', { class: 'field', style: 'flex:0 0 110px' }, h('label', null, 'Background'),
                 h('input', { type: 'color', value: t.background, oninput: (e) => { t.background = e.target.value; drawPreview(); } }))),
             inputField(tagsField, 'tags', 'Tags (comma separated)', { onChange: () => { t.tags = tagsField.tags; } }),
