@@ -287,6 +287,7 @@
     const result = Pricing.calculate(product, Options.toQuoteInput(state), settings);
     Options.renderPrice(priceBox, product, settings, state, result);
     document.getElementById('order-btn').disabled = !result.ok;
+    Options.updateMobileBar(settings, result);
     return result;
   }
 
@@ -357,6 +358,8 @@
       h('p', { class: 'help', style: 'margin-top:12px' }, `Total quoted: ${Pricing.formatMoney(b.total, settings)}. We will confirm the price and payment by email.`),
     ];
   }
+
+  document.getElementById('mb-action').addEventListener('click', () => document.getElementById('order-btn').click());
 
   document.getElementById('order-btn').addEventListener('click', () => {
     const result = updatePrice();

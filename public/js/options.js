@@ -276,6 +276,22 @@
     }
   }
 
+  // Updates the fixed price bar shown at the bottom of the screen on phones.
+  function updateMobileBar(settings, result) {
+    const total = document.getElementById('mb-total');
+    if (!total) return;
+    const sub = document.getElementById('mb-sub');
+    const action = document.getElementById('mb-action');
+    if (result.ok) {
+      total.textContent = Pricing.formatMoney(result.breakdown.total, settings);
+      sub.textContent = `${fmtNum(result.breakdown.quantity)} pcs · ${Pricing.formatMoney(result.breakdown.perPiece, settings)} each`;
+    } else {
+      total.textContent = '—';
+      sub.textContent = result.errors[0] || '';
+    }
+    action.disabled = !result.ok;
+  }
+
   function blankTemplate() {
     return {
       id: '',
@@ -285,5 +301,5 @@
     };
   }
 
-  root.Options = { defaultState, stateFromQuery, stateToQuery, toQuoteInput, createForm, renderPrice, blankTemplate };
+  root.Options = { defaultState, stateFromQuery, stateToQuery, toQuoteInput, createForm, renderPrice, updateMobileBar, blankTemplate };
 })(window);
