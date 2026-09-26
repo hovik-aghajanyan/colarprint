@@ -70,20 +70,21 @@
       icon: str(input.icon, 'Icon', { max: 8 }),
       description: str(input.description, 'Description', { max: 2000 }),
       active: input.active !== false,
-      pricePerSqm: num(input.pricePerSqm, 'Price per m²'),
+      pricePerSqft: num(input.pricePerSqft, 'Price per sq ft'),
+      displayUnit: input.displayUnit === 'ft' ? 'ft' : 'in',
       minUnitPrice: num(input.minUnitPrice, 'Minimum price per piece'),
       setupFee: num(input.setupFee, 'Setup fee'),
       minQuantity: Math.floor(num(input.minQuantity, 'Minimum quantity', { min: 1, def: 1 })),
-      minWidth: num(input.minWidth, 'Min width', { def: 1 }),
-      maxWidth: num(input.maxWidth, 'Max width', { def: 10000 }),
-      minHeight: num(input.minHeight, 'Min height', { def: 1 }),
-      maxHeight: num(input.maxHeight, 'Max height', { def: 10000 }),
+      minWidth: num(input.minWidth, 'Min width', { def: 0.1 }),
+      maxWidth: num(input.maxWidth, 'Max width', { def: 600 }),
+      minHeight: num(input.minHeight, 'Min height', { def: 0.1 }),
+      maxHeight: num(input.maxHeight, 'Max height', { def: 600 }),
       allowCustomSize: input.allowCustomSize !== false,
       sizePresets: list(input.sizePresets, 'Size preset', (p, f) => ({
         id: id(p.id, p.name),
         name: str(p.name, `${f} name`, { required: true, max: 120 }),
-        width: num(p.width, `${f} width`, { min: 1 }),
-        height: num(p.height, `${f} height`, { min: 1 }),
+        width: num(p.width, `${f} width`, { min: 0.1 }),
+        height: num(p.height, `${f} height`, { min: 0.1 }),
       })),
       colorOptions: list(input.colorOptions, 'Color option', (c, f) => ({
         id: id(c.id, c.name),
@@ -93,7 +94,7 @@
       materials: list(input.materials, 'Material', (m, f) => ({
         id: id(m.id, m.name),
         name: str(m.name, `${f} name`, { required: true, max: 120 }),
-        pricePerSqm: num(m.pricePerSqm, `${f} extra price per m²`, { min: -1e6 }),
+        pricePerSqft: num(m.pricePerSqft, `${f} extra price per sq ft`, { min: -1e6 }),
       })),
       sides: list(input.sides, 'Sides option', (s, f) => ({
         id: id(s.id, s.name),
@@ -104,7 +105,7 @@
         id: id(x.id, x.name),
         name: str(x.name, `${f} name`, { required: true, max: 120 }),
         perUnit: num(x.perUnit, `${f} price per piece`),
-        perSqm: num(x.perSqm, `${f} price per m²`),
+        perSqft: num(x.perSqft, `${f} price per sq ft`),
         flat: num(x.flat, `${f} flat fee`),
       })),
       quantityTiers: list(input.quantityTiers, 'Quantity tier', (t, f) => ({
@@ -191,8 +192,8 @@
       name,
       category: str(input.category, 'Category', { max: 60 }) || 'General',
       productIds: ids,
-      width: num(input.width, 'Width', { min: 1, def: 100 }),
-      height: num(input.height, 'Height', { min: 1, def: 100 }),
+      width: num(input.width, 'Width', { min: 0.1, def: 8.5 }),
+      height: num(input.height, 'Height', { min: 0.1, def: 11 }),
       background: color(input.background, 'Background', '#ffffff'),
       tags: (Array.isArray(input.tags) ? input.tags : String(input.tags || '').split(','))
         .map((t) => String(t).trim())

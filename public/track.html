@@ -48,7 +48,7 @@
           out.appendChild(h('div', { class: 'card' },
             h('h3', null, `Order ${o.id}`),
             h('p', null, h('span', { class: `badge status-${o.status}` }, labels[o.status] || o.status)),
-            h('p', { class: 'muted' }, `${o.productName} · ${o.quote.quantity} pcs · ${App.fmtNum(o.quote.widthMm)} × ${App.fmtNum(o.quote.heightMm)} mm`),
+            h('p', { class: 'muted' }, `${o.productName} · ${o.quote.quantity} pcs · ${Pricing.formatSize(o.quote.width ?? o.quote.widthMm / 25.4, o.quote.height ?? o.quote.heightMm / 25.4)}`),
             h('p', null, 'Total: ', h('strong', null, Pricing.formatMoney(o.quote.total, { currency: o.currency || settings.currency }))),
             h('p', { class: 'small muted' }, `Placed ${new Date(o.createdAt).toLocaleString()}`)
           ));

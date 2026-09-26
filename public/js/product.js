@@ -27,8 +27,8 @@
   let lastSuggestKey = '';
 
   function updatePreview() {
-    const w = state.widthMm;
-    const hgt = state.heightMm;
+    const w = state.width;
+    const hgt = state.height;
     preview.replaceChildren();
     if (!(w > 0 && hgt > 0)) return;
     const box = 148;
@@ -36,14 +36,14 @@
     preview.appendChild(h('div', {
       class: 'paper',
       style: `width:${Math.max(12, w * scale)}px;height:${Math.max(12, hgt * scale)}px`,
-    }, `${fmtNum(Pricing.fromMm(w, state.unit))} × ${fmtNum(Pricing.fromMm(hgt, state.unit))} ${state.unit}`));
+    }, Pricing.formatSize(w, hgt, state.unit)));
   }
 
   async function loadSuggestions() {
-    const key = `${Math.round(state.widthMm)}x${Math.round(state.heightMm)}`;
+    const key = `${Math.round(state.width)}x${Math.round(state.height)}`;
     if (key === lastSuggestKey) return;
     lastSuggestKey = key;
-    const list = await api(`/api/templates/suggest?productId=${encodeURIComponent(product.id)}&width=${state.widthMm}&height=${state.heightMm}&limit=12`);
+    const list = await api(`/api/templates/suggest?productId=${encodeURIComponent(product.id)}&width=${state.width}&height=${state.height}&limit=12`);
     const fitLabel = { good: 'Perfect fit', ok: 'Fits with small changes', poor: 'Different shape' };
     if (!list.length) {
       suggestGrid.replaceChildren(h('p', { class: 'muted' }, 'No templates for this product yet — upload your own artwork instead.'));
@@ -53,7 +53,7 @@
       ...list.map((t) =>
         h('div', { class: 'card template-card' },
           // Preview the template at the customer's size so they see the real result.
-          h('div', { class: 'design-thumb' }, Render.renderDesign(t, state.widthMm, state.heightMm)),
+          h('div', { class: 'design-thumb' }, Render.renderDesign(t, state.width, state.height)),
           h('div', { class: 'template-meta' }, h('strong', null, t.name), h('span', { class: `badge ${t.fit}` }, fitLabel[t.fit])),
           h('a', { class: 'btn small', href: `design.html?${Options.stateToQuery(product.id, state, { template: t.id })}` }, 'Use this template')
         )
@@ -69,7 +69,7 @@
     uploadBtn.href = `design.html?${Options.stateToQuery(product.id, state, { template: 'blank' })}`;
     history.replaceState(null, '', `?id=${encodeURIComponent(product.id)}&${Options.stateToQuery(product.id, state).replace(/^product=[^&]*&/, '')}`);
     clearTimeout(suggestTimer);
-    if (state.widthMm > 0 && state.heightMm > 0) suggestTimer = setTimeout(() => loadSuggestions().catch(console.error), 250);
+    if (state.width > 0 && state.height > 0) suggestTimer = setTimeout(() => loadSuggestions().catch(console.error), 250);
   }
 
   document.getElementById('mb-action').addEventListener('click', () => {

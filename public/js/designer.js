@@ -37,8 +37,8 @@
       (a, b) => Math.abs(Math.log(a.width / a.height / ratio)) - Math.abs(Math.log(b.width / b.height / ratio))
     )[0];
     state.presetId = best.id;
-    state.widthMm = best.width;
-    state.heightMm = best.height;
+    state.width = best.width;
+    state.height = best.height;
   }
 
   document.title = `Design ${product.name} — ${settings.companyName}`;
@@ -66,8 +66,8 @@
 
   // ---------- Rendering ----------
   function renderCanvas() {
-    const w = state.widthMm > 0 ? state.widthMm : 100;
-    const hh = state.heightMm > 0 ? state.heightMm : 100;
+    const w = state.width > 0 ? state.width : 100;
+    const hh = state.height > 0 ? state.height : 100;
     currentSvg = Render.renderDesign(design, w, hh, { selectedId });
     canvas.replaceChildren(currentSvg);
     bgColor.value = /^#[0-9a-f]{6}$/i.test(design.background) ? design.background : '#ffffff';
@@ -277,7 +277,7 @@
       fitHint.textContent = 'Upload your print-ready artwork. It will be scaled to fit the print size.';
       return;
     }
-    const d = Math.abs(Math.log(state.widthMm / state.heightMm / (template.width / template.height)));
+    const d = Math.abs(Math.log(state.width / state.height / (template.width / template.height)));
     fitHint.textContent = d > 0.35
       ? 'Heads up: this template was designed for a different shape. Adjust the layout or try a template that fits your size.'
       : 'The template has been adapted to your print size. Edit anything you like.';
@@ -293,7 +293,7 @@
 
   function onOptionsChange() {
     updatePrice();
-    if (state.widthMm > 0 && state.heightMm > 0) {
+    if (state.width > 0 && state.height > 0) {
       renderCanvas();
       updateFit();
     }
@@ -323,7 +323,7 @@
   }
 
   function staticOrderSent(order, b, customer) {
-    const size = `${App.fmtNum(Pricing.fromMm(b.widthMm, state.unit))} × ${App.fmtNum(Pricing.fromMm(b.heightMm, state.unit))} ${state.unit}`;
+    const size = Pricing.formatSize(b.width, b.height, state.unit);
     const lines = [
       `Order number: ${order.id}`,
       `Product: ${product.name}`,
@@ -372,7 +372,7 @@
     const submit = h('button', { class: 'btn block lg', type: 'submit' }, `Order for ${Pricing.formatMoney(result.breakdown.total, settings)}`);
     const form = h('form', { novalidate: false },
       h('h2', { id: 'order-title' }, 'Complete your order'),
-      h('p', { class: 'muted' }, `${result.breakdown.quantity} × ${product.name}, ${App.fmtNum(Pricing.fromMm(state.widthMm, state.unit))} × ${App.fmtNum(Pricing.fromMm(state.heightMm, state.unit))} ${state.unit}`),
+      h('p', { class: 'muted' }, `${result.breakdown.quantity} × ${product.name}, ${Pricing.formatSize(state.width, state.height, state.unit)}`),
       missingImage ? h('p', { class: 'error-text' }, 'Note: one of your image placeholders is empty. You can still order and email us the file.') : null,
       field('name', 'Full name', 'text', true, { autocomplete: 'name' }),
       h('div', { class: 'row' },

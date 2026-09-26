@@ -21,6 +21,14 @@ class Store {
       if (!Array.isArray(this.data[key])) this.data[key] = [];
     }
     if (!this.data.settings) this.data.settings = createSeed().settings;
+    // Databases created before the switch to US units (inches, sq ft) hold metric
+    // prices; replace their catalog with the current one but keep the orders.
+    if (this.data.products.some((p) => 'pricePerSqm' in p)) {
+      const seed = createSeed();
+      console.warn('Metric catalog found — replacing products, templates and settings with the US-unit catalog.');
+      Object.assign(this.data, { settings: seed.settings, products: seed.products, templates: seed.templates });
+      this.save();
+    }
     return this;
   }
 

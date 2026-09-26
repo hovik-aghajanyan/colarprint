@@ -7,19 +7,19 @@
   'use strict';
   const { h, fmtNum } = root.App;
 
+  // Sizes are entered in inches or feet; everything is stored in inches.
   const UNITS = [
-    { id: 'mm', name: 'mm', step: 1, digits: 0 },
-    { id: 'cm', name: 'cm', step: 0.1, digits: 1 },
-    { id: 'in', name: 'in', step: 0.01, digits: 2 },
+    { id: 'in', name: 'in', step: 0.125 },
+    { id: 'ft', name: 'ft', step: 0.25 },
   ];
 
   function defaultState(product, settings) {
     const preset = product.sizePresets[0];
     return {
-      unit: 'mm',
+      unit: product.displayUnit === 'ft' ? 'ft' : 'in',
       presetId: preset ? preset.id : 'custom',
-      widthMm: preset ? preset.width : product.minWidth,
-      heightMm: preset ? preset.height : product.minHeight,
+      width: preset ? preset.width : product.minWidth,
+      height: preset ? preset.height : product.minHeight,
       quantity: Math.max(product.minQuantity || 1, product.quantityTiers.length ? product.quantityTiers[0].minQty : 1),
       colorId: product.colorOptions[0] && product.colorOptions[0].id,
       materialId: product.materials[0] && product.materials[0].id,
@@ -34,18 +34,18 @@
     params = params || new URLSearchParams(location.search);
     const s = defaultState(product, settings);
     const has = (list, id) => list.some((x) => x.id === id);
-    if (['mm', 'cm', 'in'].includes(params.get('unit'))) s.unit = params.get('unit');
+    if (['in', 'ft'].includes(params.get('unit'))) s.unit = params.get('unit');
     const w = Number(params.get('w'));
     const hh = Number(params.get('h'));
     if (w > 0 && hh > 0) {
-      s.widthMm = w;
-      s.heightMm = hh;
+      s.width = w;
+      s.height = hh;
       const match = product.sizePresets.find((p) => p.width === w && p.height === hh);
       s.presetId = match ? match.id : product.allowCustomSize ? 'custom' : s.presetId;
       if (!match && !product.allowCustomSize) {
         const p = product.sizePresets[0];
-        s.widthMm = p.width;
-        s.heightMm = p.height;
+        s.width = p.width;
+        s.height = p.height;
       }
     }
     if (Number(params.get('qty')) > 0) s.quantity = Math.floor(Number(params.get('qty')));
@@ -60,8 +60,8 @@
   function stateToQuery(productId, s, extra) {
     const p = new URLSearchParams({
       product: productId,
-      w: String(Pricing.round2(s.widthMm)),
-      h: String(Pricing.round2(s.heightMm)),
+      w: Pricing.formatInches(s.width),
+      h: Pricing.formatInches(s.height),
       unit: s.unit,
       qty: String(s.quantity),
     });
@@ -76,7 +76,7 @@
 
   function toQuoteInput(s) {
     return {
-      widthMm: s.widthMm, heightMm: s.heightMm, quantity: s.quantity,
+      width: s.width, height: s.height, quantity: s.quantity,
       colorId: s.colorId, materialId: s.materialId, sideId: s.sideId,
       finishIds: s.finishIds, turnaroundId: s.turnaroundId,
     };
@@ -102,7 +102,7 @@
   function createForm(container, product, settings, state, onChange, opts) {
     opts = opts || {};
     const unitInfo = () => UNITS.find((u) => u.id === state.unit);
-    const disp = (mm) => Pricing.round2(Pricing.fromMm(mm, state.unit)).toFixed(unitInfo().digits).replace(/\.0+$/, '');
+    const disp = (inches) => Pricing.formatInches(Pricing.fromInches(inches, state.unit));
 
     function emit() {
       onChange(state);
@@ -124,14 +124,14 @@
       if (product.allowCustomSize) sizeItems.push({ id: 'custom', name: 'Custom size' });
 
       const widthInput = h('input', {
-        type: 'number', min: 0, step: unitInfo().step, value: disp(state.widthMm), 'aria-label': 'Width',
+        type: 'number', min: 0, step: unitInfo().step, value: disp(state.width), 'aria-label': 'Width',
         disabled: !product.allowCustomSize,
-        oninput: (e) => { state.widthMm = Pricing.toMm(e.target.value, state.unit); toCustom(); emit(); },
+        oninput: (e) => { state.width = Pricing.toInches(e.target.value, state.unit); toCustom(); emit(); },
       });
       const heightInput = h('input', {
-        type: 'number', min: 0, step: unitInfo().step, value: disp(state.heightMm), 'aria-label': 'Height',
+        type: 'number', min: 0, step: unitInfo().step, value: disp(state.height), 'aria-label': 'Height',
         disabled: !product.allowCustomSize,
-        oninput: (e) => { state.heightMm = Pricing.toMm(e.target.value, state.unit); toCustom(); emit(); },
+        oninput: (e) => { state.height = Pricing.toInches(e.target.value, state.unit); toCustom(); emit(); },
       });
       const unitSelect = h('select', {
         'aria-label': 'Unit',
@@ -141,7 +141,7 @@
       const swap = h('button', {
         type: 'button', class: 'btn secondary small', title: 'Swap width and height (portrait / landscape)',
         onclick: () => {
-          [state.widthMm, state.heightMm] = [state.heightMm, state.widthMm];
+          [state.width, state.height] = [state.height, state.width];
           if (state.presetId !== 'custom' && product.allowCustomSize) state.presetId = 'custom';
           render();
           emit();
@@ -153,7 +153,7 @@
         radioChips('size', sizeItems, state.presetId, (id) => {
           state.presetId = id;
           const p = product.sizePresets.find((x) => x.id === id);
-          if (p) { state.widthMm = p.width; state.heightMm = p.height; }
+          if (p) { state.width = p.width; state.height = p.height; }
           render();
           emit();
         }),
@@ -238,7 +238,7 @@
     }
     const b = result.breakdown;
     const lines = [
-      ['Size', `${fmtNum(Pricing.fromMm(b.widthMm, state.unit))} × ${fmtNum(Pricing.fromMm(b.heightMm, state.unit))} ${state.unit} (${fmtNum(b.areaSqm, 4)} m²)`],
+      ['Size', `${Pricing.formatSize(b.width, b.height, state.unit)} (${Pricing.formatArea(b.areaSqft)})`],
       ['Price per piece', money(b.unitPrice)],
       [`Subtotal (${fmtNum(b.quantity)} pcs)`, money(b.subtotal)],
     ];

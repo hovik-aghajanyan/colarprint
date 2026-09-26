@@ -5,8 +5,8 @@ A website for a printing company. Customers choose a size, see the price straigh
 ## Features
 
 **Storefront**
-- **Size-based pricing:** pick a standard size or type a custom one in mm, cm or inches. The price updates as you type.
-- Price inputs: print area × price per m², color mode (B/W, CMYK, spot), material, printed sides, finishing (per piece, per m² or flat fee), quantity discounts, turnaround (standard, express, same day) and tax.
+- **Size-based pricing:** pick a standard US size (Letter, Tabloid, 18 × 24 in, 6 × 3 ft banners and more) or type a custom size in inches or feet. The price updates as you type.
+- Price inputs: print area × price per square foot, color mode (B/W, CMYK, spot), material, printed sides, finishing (per piece, per sq ft or flat fee), quantity discounts, turnaround (standard, express, same day) and tax.
 - A "Buy more, save more" table shows the price per piece at each quantity tier.
 - **Template suggestions:** templates are ranked by how closely their proportions match the size you chose. Each one is previewed at your size.
 - **Design studio:** edit the text, colors and sizes, drag elements around, add text or upload a logo or image, change the background, and download a PNG preview. You can also upload your own print-ready artwork instead.
@@ -16,23 +16,23 @@ A website for a printing company. Customers choose a size, see the price straigh
 **Admin panel** (`/admin`)
 - A dashboard with order counts and revenue.
 - Orders: search and filter, change the status, view the design, and download it as PNG or SVG along with the original uploaded images.
-- Products and pricing: price per m², minimum piece price, setup fee, minimum quantity, size limits, size presets, color options (multipliers), materials (extra per m²), sides, finishes and quantity discount tiers. A **live price tester** shows the effect of your changes before you save them.
+- Products and pricing: price per sq ft, minimum piece price, setup fee, minimum quantity, size limits, size presets, color options (multipliers), materials (extra per sq ft), sides, finishes and quantity discount tiers. A **live price tester** shows the effect of your changes before you save them.
 - Templates: a visual editor for text, rectangle, circle and image elements, with a live preview. You choose which products each template is offered for.
 - Settings: company details, currency, tax/VAT and turnaround options.
 
 ## Pricing formula
 
 ```
-area          = width × height (m²)
-piece price   = max(area × (price/m² + material extra) × color multiplier × sides multiplier, min piece price)
-              + finishes (per piece + per m² × area)
+area          = width × height (inches) ÷ 144   → square feet
+piece price   = max(area × (price/sq ft + material extra) × color multiplier × sides multiplier, min piece price)
+              + finishes (per piece + per sq ft × area)
 subtotal      = piece price × quantity
 discount      = subtotal × tier %            (highest tier reached)
 rush fee      = (subtotal − discount) × (turnaround multiplier − 1)
 total         = (subtotal − discount + rush fee + setup fee + finish flat fees) × (1 + tax %)
 ```
 
-The same engine (`public/js/pricing.js`) runs in the browser for live quotes and on the server for the final price.
+The same engine (`public/js/pricing.js`) runs in the browser for live quotes and on the server for the final price. Sizes are stored in inches; each product can show them to customers in inches or feet (banners use feet).
 
 ## Running
 

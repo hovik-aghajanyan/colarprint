@@ -74,7 +74,7 @@
 
   function quoteFor(db, product, body) {
     return root.Pricing.calculate(product, {
-      widthMm: body.widthMm, heightMm: body.heightMm, quantity: body.quantity,
+      width: body.width, height: body.height, quantity: body.quantity,
       colorId: body.colorId, materialId: body.materialId, sideId: body.sideId,
       finishIds: body.finishIds, turnaroundId: body.turnaroundId,
     }, db.settings);
@@ -142,7 +142,7 @@
         status: 'new',
         productId: p.id,
         productName: p.name,
-        displayUnit: ['mm', 'cm', 'in'].includes(body.displayUnit) ? body.displayUnit : 'mm',
+        displayUnit: body.displayUnit === 'ft' ? 'ft' : 'in',
         quote: quote.breakdown,
         currency: db.settings.currency,
         customer,

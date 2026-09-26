@@ -32,18 +32,18 @@ test('public catalogue and quote', () =>
     assert.equal(products.status, 200);
     assert.ok(products.body.length >= 5);
 
-    const quote = await call('POST', '/api/quote', { productId: 'posters', widthMm: 594, heightMm: 841, quantity: 1 });
+    const quote = await call('POST', '/api/quote', { productId: 'posters', width: 18, height: 24, quantity: 1 });
     assert.equal(quote.status, 200);
     assert.equal(quote.body.ok, true);
     assert.ok(quote.body.breakdown.total > 0);
 
-    const bad = await call('POST', '/api/quote', { productId: 'posters', widthMm: 99999, heightMm: 841, quantity: 1 });
+    const bad = await call('POST', '/api/quote', { productId: 'posters', width: 999, height: 24, quantity: 1 });
     assert.equal(bad.status, 400);
   }));
 
 test('template suggestions rank by aspect ratio', () =>
   withServer(async (call) => {
-    const wide = await call('GET', '/api/templates/suggest?productId=banners&width=3000&height=1000');
+    const wide = await call('GET', '/api/templates/suggest?productId=banners&width=120&height=36');
     assert.equal(wide.status, 200);
     assert.equal(wide.body[0].id, 'banner-birthday');
     assert.equal(wide.body[0].fit, 'good');
@@ -63,17 +63,17 @@ test('admin endpoints require login', () =>
 test('admin price changes affect quotes', () =>
   withServer(async (call) => {
     const token = await login(call);
-    const q = { productId: 'posters', widthMm: 1000, heightMm: 1000, quantity: 1 };
+    const q = { productId: 'posters', width: 36, height: 36, quantity: 1 };
     const before = (await call('POST', '/api/quote', q)).body.breakdown.total;
 
     const product = (await call('GET', '/api/products/posters')).body;
-    const updated = await call('PUT', '/api/admin/products/posters', { ...product, pricePerSqm: product.pricePerSqm * 2 }, token);
+    const updated = await call('PUT', '/api/admin/products/posters', { ...product, pricePerSqft: product.pricePerSqft * 2 }, token);
     assert.equal(updated.status, 200);
 
     const after = (await call('POST', '/api/quote', q)).body.breakdown.total;
     assert.ok(Math.abs(after - before * 2) < 0.02, `${after} should be double ${before}`);
 
-    const invalid = await call('PUT', '/api/admin/products/posters', { ...product, pricePerSqm: 'abc' }, token);
+    const invalid = await call('PUT', '/api/admin/products/posters', { ...product, pricePerSqft: 'abc' }, token);
     assert.equal(invalid.status, 400);
   }));
 
@@ -81,8 +81,8 @@ test('create product and template', () =>
   withServer(async (call) => {
     const token = await login(call);
     const created = await call('POST', '/api/admin/products', {
-      name: 'Mugs', pricePerSqm: 100, minUnitPrice: 8,
-      sizePresets: [{ name: 'Standard', width: 200, height: 90 }],
+      name: 'Mugs', pricePerSqft: 10, minUnitPrice: 8,
+      sizePresets: [{ name: 'Standard', width: 8, height: 3.5 }],
       colorOptions: [{ name: 'Full color', multiplier: 1 }],
     }, token);
     assert.equal(created.status, 201);
@@ -90,7 +90,7 @@ test('create product and template', () =>
     assert.equal(created.body.sizePresets[0].id, 'standard');
 
     const tpl = await call('POST', '/api/admin/templates', {
-      name: 'Mug Hello', productIds: ['mugs'], width: 200, height: 90,
+      name: 'Mug Hello', productIds: ['mugs'], width: 8, height: 3.5,
       elements: [{ type: 'text', text: 'Hello', x: 50, y: 50, size: 20, color: '#000000' }],
     }, token);
     assert.equal(tpl.status, 201);
@@ -105,7 +105,7 @@ test('create product and template', () =>
 test('orders: server recomputes price and admin can update status', () =>
   withServer(async (call) => {
     const order = await call('POST', '/api/orders', {
-      productId: 'business-cards', widthMm: 89, heightMm: 51, quantity: 500, colorId: 'cmyk',
+      productId: 'business-cards', width: 3.5, height: 2, quantity: 500, colorId: 'cmyk',
       finishIds: ['rounded'], turnaroundId: 'express',
       customer: { name: 'Ann', email: 'ann@example.com' },
       design: { templateId: 'bc-modern', background: '#ffffff', elements: [{ type: 'text', text: '<script>x</script>', x: 1, y: 1, size: 5, color: '#000' }] },
@@ -113,7 +113,7 @@ test('orders: server recomputes price and admin can update status', () =>
     });
     assert.equal(order.status, 201);
     const quote = (await call('POST', '/api/quote', {
-      productId: 'business-cards', widthMm: 89, heightMm: 51, quantity: 500, colorId: 'cmyk', finishIds: ['rounded'], turnaroundId: 'express',
+      productId: 'business-cards', width: 3.5, height: 2, quantity: 500, colorId: 'cmyk', finishIds: ['rounded'], turnaroundId: 'express',
     })).body.breakdown;
     assert.equal(order.body.total, quote.total);
 
@@ -127,11 +127,11 @@ test('orders: server recomputes price and admin can update status', () =>
     assert.equal(patched.status, 200);
     assert.equal((await call('PATCH', `/api/admin/orders/${order.body.id}`, { status: 'bogus' }, token)).status, 400);
 
-    const missingEmail = await call('POST', '/api/orders', { productId: 'business-cards', widthMm: 89, heightMm: 51, quantity: 500, customer: { name: 'A' } });
+    const missingEmail = await call('POST', '/api/orders', { productId: 'business-cards', width: 3.5, height: 2, quantity: 500, customer: { name: 'A' } });
     assert.equal(missingEmail.status, 400);
 
     const badImage = await call('POST', '/api/orders', {
-      productId: 'business-cards', widthMm: 89, heightMm: 51, quantity: 500,
+      productId: 'business-cards', width: 3.5, height: 2, quantity: 500,
       customer: { name: 'A', email: 'a@b.co' },
       design: { elements: [{ type: 'image', href: 'javascript:alert(1)' }] },
     });

@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-26",
+  "version": "2026-09-26-us",
   "settings": {
     "companyName": "ColorPrint",
     "tagline": "Print anything, any size — priced instantly.",
@@ -35,33 +35,32 @@
       "icon": "💼",
       "description": "Premium business cards on thick card stock. Make a great first impression.",
       "active": true,
-      "pricePerSqm": 60,
       "minUnitPrice": 0.05,
       "setupFee": 5,
       "minQuantity": 50,
-      "minWidth": 50,
-      "maxWidth": 100,
-      "minHeight": 50,
-      "maxHeight": 100,
+      "minWidth": 1.5,
+      "maxWidth": 4,
+      "minHeight": 1.5,
+      "maxHeight": 4,
       "allowCustomSize": true,
       "sizePresets": [
         {
-          "id": "us",
-          "name": "US Standard (89 × 51 mm)",
-          "width": 89,
-          "height": 51
-        },
-        {
-          "id": "eu",
-          "name": "EU Standard (85 × 55 mm)",
-          "width": 85,
-          "height": 55
+          "id": "standard",
+          "name": "Standard (3.5 × 2 in)",
+          "width": 3.5,
+          "height": 2
         },
         {
           "id": "square",
-          "name": "Square (65 × 65 mm)",
-          "width": 65,
-          "height": 65
+          "name": "Square (2.5 × 2.5 in)",
+          "width": 2.5,
+          "height": 2.5
+        },
+        {
+          "id": "slim",
+          "name": "Slim (3.5 × 1.5 in)",
+          "width": 3.5,
+          "height": 1.5
         }
       ],
       "colorOptions": [
@@ -84,23 +83,23 @@
       "materials": [
         {
           "id": "matte-350",
-          "name": "Matte 350gsm",
-          "pricePerSqm": 0
+          "name": "Matte 14 pt card",
+          "pricePerSqft": 0.0
         },
         {
           "id": "gloss-350",
-          "name": "Gloss 350gsm",
-          "pricePerSqm": 5
+          "name": "Gloss 14 pt card",
+          "pricePerSqft": 0.45
         },
         {
           "id": "kraft",
-          "name": "Recycled Kraft",
-          "pricePerSqm": 12
+          "name": "Recycled kraft",
+          "pricePerSqft": 1.1
         },
         {
           "id": "linen",
-          "name": "Linen Textured 400gsm",
-          "pricePerSqm": 20
+          "name": "Linen textured 16 pt",
+          "pricePerSqft": 1.85
         }
       ],
       "sides": [
@@ -120,22 +119,22 @@
           "id": "rounded",
           "name": "Rounded corners",
           "perUnit": 0.02,
-          "perSqm": 0,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.0
         },
         {
           "id": "soft-touch",
           "name": "Soft-touch lamination",
           "perUnit": 0,
-          "perSqm": 25,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 2.3
         },
         {
           "id": "foil",
           "name": "Gold foil accent",
           "perUnit": 0.08,
-          "perSqm": 0,
-          "flat": 25
+          "flat": 25,
+          "perSqft": 0.0
         }
       ],
       "quantityTiers": [
@@ -151,7 +150,9 @@
           "minQty": 1000,
           "discountPct": 25
         }
-      ]
+      ],
+      "pricePerSqft": 5.5,
+      "displayUnit": "in"
     },
     {
       "id": "flyers",
@@ -159,45 +160,50 @@
       "icon": "📄",
       "description": "Eye-catching flyers for events, promotions and menus.",
       "active": true,
-      "pricePerSqm": 14,
       "minUnitPrice": 0.08,
       "setupFee": 5,
       "minQuantity": 25,
-      "minWidth": 90,
-      "maxWidth": 450,
-      "minHeight": 90,
-      "maxHeight": 450,
+      "minWidth": 3.5,
+      "maxWidth": 18,
+      "minHeight": 3.5,
+      "maxHeight": 18,
       "allowCustomSize": true,
       "sizePresets": [
         {
-          "id": "a6",
-          "name": "A6 (105 × 148 mm)",
-          "width": 105,
-          "height": 148
+          "id": "4x6",
+          "name": "Postcard (4 × 6 in)",
+          "width": 4,
+          "height": 6
         },
         {
-          "id": "a5",
-          "name": "A5 (148 × 210 mm)",
-          "width": 148,
-          "height": 210
+          "id": "5x7",
+          "name": "5 × 7 in",
+          "width": 5,
+          "height": 7
         },
         {
-          "id": "a4",
-          "name": "A4 (210 × 297 mm)",
-          "width": 210,
-          "height": 297
+          "id": "half-letter",
+          "name": "Half Letter (5.5 × 8.5 in)",
+          "width": 5.5,
+          "height": 8.5
         },
         {
           "id": "letter",
-          "name": "US Letter (216 × 279 mm)",
-          "width": 216,
-          "height": 279
+          "name": "Letter (8.5 × 11 in)",
+          "width": 8.5,
+          "height": 11
         },
         {
-          "id": "dl",
-          "name": "DL (99 × 210 mm)",
-          "width": 99,
-          "height": 210
+          "id": "tabloid",
+          "name": "Tabloid (11 × 17 in)",
+          "width": 11,
+          "height": 17
+        },
+        {
+          "id": "rack",
+          "name": "Rack card (4 × 9 in)",
+          "width": 4,
+          "height": 9
         }
       ],
       "colorOptions": [
@@ -220,18 +226,18 @@
       "materials": [
         {
           "id": "silk-130",
-          "name": "Silk 130gsm",
-          "pricePerSqm": 0
+          "name": "Silk 80 lb text",
+          "pricePerSqft": 0.0
         },
         {
           "id": "gloss-170",
-          "name": "Gloss 170gsm",
-          "pricePerSqm": 2
+          "name": "Gloss 100 lb text",
+          "pricePerSqft": 0.2
         },
         {
           "id": "matte-250",
-          "name": "Matte 250gsm",
-          "pricePerSqm": 4
+          "name": "Matte 80 lb cover",
+          "pricePerSqft": 0.35
         }
       ],
       "sides": [
@@ -251,15 +257,15 @@
           "id": "fold",
           "name": "Folding",
           "perUnit": 0.03,
-          "perSqm": 0,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.0
         },
         {
           "id": "gloss-lam",
           "name": "Gloss lamination",
           "perUnit": 0,
-          "perSqm": 6,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.55
         }
       ],
       "quantityTiers": [
@@ -279,53 +285,54 @@
           "minQty": 5000,
           "discountPct": 30
         }
-      ]
+      ],
+      "pricePerSqft": 1.3,
+      "displayUnit": "in"
     },
     {
       "id": "posters",
       "name": "Posters",
       "icon": "🖼️",
-      "description": "Vivid large-format posters in any size — from A3 up to 1.2 metres wide.",
+      "description": "Vivid large-format posters in any size, from 11 × 17 in up to 4 ft wide.",
       "active": true,
-      "pricePerSqm": 22,
       "minUnitPrice": 3,
       "setupFee": 0,
       "minQuantity": 1,
-      "minWidth": 200,
-      "maxWidth": 1200,
-      "minHeight": 200,
-      "maxHeight": 2000,
+      "minWidth": 8,
+      "maxWidth": 48,
+      "minHeight": 8,
+      "maxHeight": 80,
       "allowCustomSize": true,
       "sizePresets": [
         {
-          "id": "a3",
-          "name": "A3 (297 × 420 mm)",
-          "width": 297,
-          "height": 420
+          "id": "11x17",
+          "name": "11 × 17 in",
+          "width": 11,
+          "height": 17
         },
         {
-          "id": "a2",
-          "name": "A2 (420 × 594 mm)",
-          "width": 420,
-          "height": 594
-        },
-        {
-          "id": "a1",
-          "name": "A1 (594 × 841 mm)",
-          "width": 594,
-          "height": 841
-        },
-        {
-          "id": "a0",
-          "name": "A0 (841 × 1189 mm)",
-          "width": 841,
-          "height": 1189
+          "id": "12x18",
+          "name": "12 × 18 in",
+          "width": 12,
+          "height": 18
         },
         {
           "id": "18x24",
-          "name": "18 × 24 in (457 × 610 mm)",
-          "width": 457,
-          "height": 610
+          "name": "18 × 24 in",
+          "width": 18,
+          "height": 24
+        },
+        {
+          "id": "24x36",
+          "name": "24 × 36 in",
+          "width": 24,
+          "height": 36
+        },
+        {
+          "id": "27x40",
+          "name": "Movie poster (27 × 40 in)",
+          "width": 27,
+          "height": 40
         }
       ],
       "colorOptions": [
@@ -348,18 +355,18 @@
       "materials": [
         {
           "id": "satin-200",
-          "name": "Satin Photo 200gsm",
-          "pricePerSqm": 0
+          "name": "Satin photo 8 mil",
+          "pricePerSqft": 0.0
         },
         {
           "id": "gloss-photo",
-          "name": "High-gloss Photo 260gsm",
-          "pricePerSqm": 8
+          "name": "High-gloss photo 10 mil",
+          "pricePerSqft": 0.75
         },
         {
           "id": "backlit",
-          "name": "Backlit Film",
-          "pricePerSqm": 18
+          "name": "Backlit film",
+          "pricePerSqft": 1.65
         }
       ],
       "sides": [
@@ -374,15 +381,15 @@
           "id": "lamination",
           "name": "Matte lamination",
           "perUnit": 0,
-          "perSqm": 9,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.85
         },
         {
           "id": "foam-board",
-          "name": "Mount on 5mm foam board",
+          "name": "Mount on 3/16 in foam board",
           "perUnit": 2,
-          "perSqm": 25,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 2.3
         }
       ],
       "quantityTiers": [
@@ -398,47 +405,48 @@
           "minQty": 50,
           "discountPct": 20
         }
-      ]
+      ],
+      "pricePerSqft": 2.0,
+      "displayUnit": "in"
     },
     {
       "id": "banners",
       "name": "Vinyl Banners",
       "icon": "🎌",
-      "description": "Durable outdoor vinyl banners with hems and grommets. Up to 5 metres long.",
+      "description": "Durable outdoor vinyl banners with hems and grommets. Up to 20 ft long.",
       "active": true,
-      "pricePerSqm": 18,
       "minUnitPrice": 15,
       "setupFee": 10,
       "minQuantity": 1,
-      "minWidth": 300,
-      "maxWidth": 5000,
-      "minHeight": 300,
-      "maxHeight": 2500,
+      "minWidth": 12,
+      "maxWidth": 240,
+      "minHeight": 12,
+      "maxHeight": 120,
       "allowCustomSize": true,
       "sizePresets": [
         {
           "id": "2x4ft",
-          "name": "4 × 2 ft (1219 × 610 mm)",
-          "width": 1219,
-          "height": 610
+          "name": "4 × 2 ft",
+          "width": 48,
+          "height": 24
         },
         {
           "id": "3x6ft",
-          "name": "6 × 3 ft (1829 × 914 mm)",
-          "width": 1829,
-          "height": 914
+          "name": "6 × 3 ft",
+          "width": 72,
+          "height": 36
         },
         {
-          "id": "1x3m",
-          "name": "3 × 1 m",
-          "width": 3000,
-          "height": 1000
+          "id": "4x8ft",
+          "name": "8 × 4 ft",
+          "width": 96,
+          "height": 48
         },
         {
-          "id": "2x5m",
-          "name": "5 × 2 m",
-          "width": 5000,
-          "height": 2000
+          "id": "3x10ft",
+          "name": "10 × 3 ft",
+          "width": 120,
+          "height": 36
         }
       ],
       "colorOptions": [
@@ -461,18 +469,18 @@
       "materials": [
         {
           "id": "vinyl-440",
-          "name": "Vinyl 440gsm",
-          "pricePerSqm": 0
+          "name": "13 oz vinyl",
+          "pricePerSqft": 0.0
         },
         {
           "id": "mesh",
-          "name": "Wind-through Mesh",
-          "pricePerSqm": 4
+          "name": "Wind-through mesh",
+          "pricePerSqft": 0.35
         },
         {
           "id": "blockout",
-          "name": "Blockout (double sided)",
-          "pricePerSqm": 9
+          "name": "18 oz blockout (double sided)",
+          "pricePerSqft": 0.85
         }
       ],
       "sides": [
@@ -492,15 +500,15 @@
           "id": "grommets",
           "name": "Hems & grommets",
           "perUnit": 4,
-          "perSqm": 0,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.0
         },
         {
           "id": "pole-pockets",
           "name": "Pole pockets",
           "perUnit": 8,
-          "perSqm": 0,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.0
         }
       ],
       "quantityTiers": [
@@ -512,7 +520,9 @@
           "minQty": 10,
           "discountPct": 12
         }
-      ]
+      ],
+      "pricePerSqft": 1.75,
+      "displayUnit": "ft"
     },
     {
       "id": "stickers",
@@ -520,33 +530,32 @@
       "icon": "🏷️",
       "description": "Custom die-cut stickers and product labels, waterproof and UV resistant.",
       "active": true,
-      "pricePerSqm": 45,
       "minUnitPrice": 0.12,
       "setupFee": 8,
       "minQuantity": 25,
-      "minWidth": 20,
-      "maxWidth": 300,
-      "minHeight": 20,
-      "maxHeight": 300,
+      "minWidth": 1,
+      "maxWidth": 12,
+      "minHeight": 1,
+      "maxHeight": 12,
       "allowCustomSize": true,
       "sizePresets": [
         {
-          "id": "50",
-          "name": "50 × 50 mm",
-          "width": 50,
-          "height": 50
+          "id": "2x2",
+          "name": "2 × 2 in",
+          "width": 2,
+          "height": 2
         },
         {
-          "id": "75",
-          "name": "75 × 75 mm",
-          "width": 75,
-          "height": 75
+          "id": "3x3",
+          "name": "3 × 3 in",
+          "width": 3,
+          "height": 3
         },
         {
-          "id": "100x50",
-          "name": "100 × 50 mm label",
-          "width": 100,
-          "height": 50
+          "id": "4x2",
+          "name": "Label (4 × 2 in)",
+          "width": 4,
+          "height": 2
         }
       ],
       "colorOptions": [
@@ -569,18 +578,18 @@
       "materials": [
         {
           "id": "white-vinyl",
-          "name": "White Vinyl",
-          "pricePerSqm": 0
+          "name": "White vinyl",
+          "pricePerSqft": 0.0
         },
         {
           "id": "clear-vinyl",
-          "name": "Clear Vinyl",
-          "pricePerSqm": 8
+          "name": "Clear vinyl",
+          "pricePerSqft": 0.75
         },
         {
           "id": "holographic",
           "name": "Holographic",
-          "pricePerSqm": 30
+          "pricePerSqft": 2.8
         }
       ],
       "sides": [
@@ -595,15 +604,15 @@
           "id": "die-cut",
           "name": "Custom die-cut shape",
           "perUnit": 0.04,
-          "perSqm": 0,
-          "flat": 15
+          "flat": 15,
+          "perSqft": 0.0
         },
         {
           "id": "laminate",
           "name": "UV laminate",
           "perUnit": 0,
-          "perSqm": 12,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 1.1
         }
       ],
       "quantityTiers": [
@@ -619,7 +628,9 @@
           "minQty": 2000,
           "discountPct": 30
         }
-      ]
+      ],
+      "pricePerSqft": 4.0,
+      "displayUnit": "in"
     },
     {
       "id": "canvas",
@@ -627,33 +638,38 @@
       "icon": "🎨",
       "description": "Gallery-wrapped canvas prints on a solid pine frame, ready to hang.",
       "active": true,
-      "pricePerSqm": 55,
       "minUnitPrice": 19,
       "setupFee": 0,
       "minQuantity": 1,
-      "minWidth": 200,
-      "maxWidth": 1500,
-      "minHeight": 200,
-      "maxHeight": 1500,
+      "minWidth": 8,
+      "maxWidth": 60,
+      "minHeight": 8,
+      "maxHeight": 60,
       "allowCustomSize": true,
       "sizePresets": [
         {
-          "id": "30x40",
-          "name": "30 × 40 cm",
-          "width": 300,
-          "height": 400
+          "id": "12x16",
+          "name": "12 × 16 in",
+          "width": 12,
+          "height": 16
         },
         {
-          "id": "50x50",
-          "name": "50 × 50 cm",
-          "width": 500,
-          "height": 500
+          "id": "16x20",
+          "name": "16 × 20 in",
+          "width": 16,
+          "height": 20
         },
         {
-          "id": "60x90",
-          "name": "60 × 90 cm",
-          "width": 900,
-          "height": 600
+          "id": "20x20",
+          "name": "20 × 20 in",
+          "width": 20,
+          "height": 20
+        },
+        {
+          "id": "36x24",
+          "name": "36 × 24 in",
+          "width": 36,
+          "height": 24
         }
       ],
       "colorOptions": [
@@ -676,13 +692,13 @@
       "materials": [
         {
           "id": "cotton",
-          "name": "Cotton Canvas",
-          "pricePerSqm": 0
+          "name": "Cotton canvas",
+          "pricePerSqft": 0.0
         },
         {
           "id": "poly-cotton",
-          "name": "Premium Poly-Cotton",
-          "pricePerSqm": 10
+          "name": "Premium poly-cotton",
+          "pricePerSqft": 0.95
         }
       ],
       "sides": [
@@ -695,17 +711,17 @@
       "finishes": [
         {
           "id": "thick-frame",
-          "name": "38mm thick frame",
+          "name": "1.5 in thick frame",
           "perUnit": 6,
-          "perSqm": 0,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 0.0
         },
         {
           "id": "varnish",
           "name": "Protective varnish",
           "perUnit": 0,
-          "perSqm": 12,
-          "flat": 0
+          "flat": 0,
+          "perSqft": 1.1
         }
       ],
       "quantityTiers": [
@@ -713,7 +729,9 @@
           "minQty": 3,
           "discountPct": 8
         }
-      ]
+      ],
+      "pricePerSqft": 5.0,
+      "displayUnit": "in"
     }
   ],
   "templates": [
@@ -724,8 +742,8 @@
       "productIds": [
         "business-cards"
       ],
-      "width": 89,
-      "height": 51,
+      "width": 3.5,
+      "height": 2,
       "background": "#ffffff",
       "tags": [
         "minimal",
@@ -790,8 +808,8 @@
       "productIds": [
         "business-cards"
       ],
-      "width": 85,
-      "height": 55,
+      "width": 3.5,
+      "height": 2,
       "background": "#111827",
       "tags": [
         "dark",
@@ -854,8 +872,8 @@
       "productIds": [
         "business-cards"
       ],
-      "width": 89,
-      "height": 51,
+      "width": 3.5,
+      "height": 2,
       "background": "#fdf6e3",
       "tags": [
         "classic",
@@ -920,8 +938,8 @@
         "flyers",
         "posters"
       ],
-      "width": 148,
-      "height": 210,
+      "width": 5.5,
+      "height": 8.5,
       "background": "#1e1b4b",
       "tags": [
         "party",
@@ -1010,8 +1028,8 @@
         "posters",
         "banners"
       ],
-      "width": 210,
-      "height": 297,
+      "width": 8.5,
+      "height": 11,
       "background": "#fef2f2",
       "tags": [
         "sale",
@@ -1103,8 +1121,8 @@
         "posters",
         "canvas"
       ],
-      "width": 297,
-      "height": 420,
+      "width": 18,
+      "height": 24,
       "background": "#f5f5f4",
       "tags": [
         "art",
@@ -1164,8 +1182,8 @@
       "productIds": [
         "banners"
       ],
-      "width": 1829,
-      "height": 914,
+      "width": 72,
+      "height": 36,
       "background": "#065f46",
       "tags": [
         "opening",
@@ -1231,8 +1249,8 @@
         "banners",
         "posters"
       ],
-      "width": 3000,
-      "height": 1000,
+      "width": 120,
+      "height": 36,
       "background": "#fdf2f8",
       "tags": [
         "birthday",
@@ -1307,8 +1325,8 @@
       "productIds": [
         "stickers"
       ],
-      "width": 75,
-      "height": 75,
+      "width": 3,
+      "height": 3,
       "background": "#ffffff",
       "tags": [
         "logo",
@@ -1367,8 +1385,8 @@
       "productIds": [
         "stickers"
       ],
-      "width": 100,
-      "height": 50,
+      "width": 4,
+      "height": 2,
       "background": "#fffbeb",
       "tags": [
         "label",
@@ -1432,8 +1450,8 @@
         "canvas",
         "posters"
       ],
-      "width": 500,
-      "height": 500,
+      "width": 20,
+      "height": 20,
       "background": "#0f172a",
       "tags": [
         "quote",
